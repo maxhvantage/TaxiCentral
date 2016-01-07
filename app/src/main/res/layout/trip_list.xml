@@ -1,0 +1,165 @@
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_below="@+id/ll"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white_light"
+    app:cardElevation="2dp"
+    app:cardCornerRadius="0dp"
+    app:cardBackgroundColor="@color/white">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        >
+
+        <TextView
+        android:id="@+id/km_hours_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:textColor="@color/black"
+        android:text=""
+        />
+
+        <TextView
+            android:id="@+id/trip_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:textColor="@color/black"
+            android:text="@string/tripid"
+            />
+
+        <LinearLayout
+            android:id="@+id/image_ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/km_hours_tv"
+            android:padding="5dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/img_app"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:src="@drawable/userapp"
+                />
+            <ImageView
+                android:id="@+id/img_corporate"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:src="@drawable/corporate"
+                />
+            <ImageView
+                android:id="@+id/img_webportal"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:src="@drawable/webportal"
+                />
+            <ImageView
+                android:id="@+id/img_taxicompany"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:src="@drawable/taxicompany"
+                />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/agreement_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/image_ll"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            android:ems="6"
+            android:text="@string/agrement"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/agreement"
+            android:layout_below="@+id/agreement_tv"
+            android:maxLength="25"
+            android:paddingLeft="@dimen/text_left_padding"
+            android:text="taxi agreement"
+            />
+        <TextView
+            android:id="@+id/desti_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/agreement"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            android:text="@string/destination_address"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/destination"
+            android:layout_below="@+id/desti_tv"
+            android:paddingLeft="@dimen/text_left_padding"
+            android:text="destination adddress"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/fare"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            android:layout_below="@+id/destination"
+            android:text="@string/fare"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/fare_tv"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/destination"
+            android:layout_toRightOf="@+id/fare"
+            android:paddingLeft="@dimen/text_left_padding"
+            android:text="12"
+            />
+
+
+
+        <android.support.v7.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/btn_height"
+            app:cardBackgroundColor="@color/colorPrimary"
+            app:cardElevation="2dp"
+            app:cardCornerRadius="2dp"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/fare_tv">
+            <com.balysv.materialripple.MaterialRippleLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:mrl_rippleBackground="@color/colorPrimary"
+                app:mrl_rippleColor="@color/black">
+        <Button
+            android:id="@+id/btn_details"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:paddingLeft="@dimen/btn_detail_padding_left"
+            android:paddingRight="@dimen/btn_detail_padding_left"
+            android:textSize="@dimen/btn_text_size"
+            android:textStyle="bold"
+            android:text="@string/details"/>
+            </com.balysv.materialripple.MaterialRippleLayout>
+        </android.support.v7.widget.CardView>
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.taxicentral.Activity.TripAcceptActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+    </android.support.design.widget.AppBarLayout>
+
+
+    <include layout="@layout/content_trip_accept" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.getbase.floatingactionbutton.FloatingActionsMenu
+            xmlns:fab="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/fab_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            fab:fab_addButtonSize="normal"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            fab:fab_addButtonColorNormal="@color/colorPrimary"
+            fab:fab_addButtonColorPressed="@color/black_light"
+            fab:fab_addButtonPlusIconColor="@color/black"
+            fab:fab_labelStyle="@style/menu_labels_style"
+            android:layout_marginBottom="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp">
+
+
+            <com.getbase.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_arrived"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                fab:fab_size="mini"
+                fab:fab_colorNormal="@color/yellow_light"
+                fab:fab_title="@string/arrived"
+                fab:fab_icon="@drawable/ic_action_car"
+                fab:fab_colorPressed="@color/black_light"/>
+
+
+            <com.getbase.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                fab:fab_size="mini"
+                fab:fab_colorNormal="@color/yellow_light"
+                fab:fab_title="@string/send_message"
+                fab:fab_colorDisabled="@color/black"
+                fab:fab_icon="@drawable/ic_action_send"
+                fab:fab_colorPressed="@color/black_light"/>
+
+            <com.getbase.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                fab:fab_size="mini"
+                fab:fab_colorNormal="@color/yellow_light"
+                fab:fab_title="@string/cancel_trip"
+                fab:fab_colorDisabled="@color/black"
+                fab:fab_icon="@drawable/canceltrip"
+                fab:fab_colorPressed="@color/black_light"/>
+
+        </com.getbase.floatingactionbutton.FloatingActionsMenu>
+    </RelativeLayout>
+
+</android.support.design.widget.CoordinatorLayout>

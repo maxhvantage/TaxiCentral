@@ -1,0 +1,18 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item android:drawable="@drawable/plusxml" android:state_empty="true"
+        android:top="20dp"
+        android:bottom="20dp">
+</item>
+
+    <item android:drawable="@drawable/minusxml"     android:state_expanded="true"
+        android:top="20dp"
+        android:bottom="20dp">
+    </item>
+
+    <item android:drawable="@drawable/plusxml"
+        android:top="20dp"
+        android:bottom="20dp">
+
+    </item>
+</selector>

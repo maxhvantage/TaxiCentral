@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:background="@color/white_light"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:showIn="@layout/activity_trip_details"
+    tools:context="com.taxicentral.Activity.TripDetailsActivity">
+
+
+<ScrollView
+    android:id="@+id/scrollView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_above="@+id/btn_ll"
+    android:scrollbars="none">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white_light"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="@color/white">
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/info_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/trip_information"
+                android:textColor="@color/colorPrimary"
+                android:textSize="@dimen/text_header"
+                android:textStyle="bold"
+                android:padding="10dp"
+                android:textAllCaps="true"
+                android:background="@color/black"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                >
+
+                <TextView
+                    android:id="@+id/km_hours_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:text="10KM - 20 Min"
+                    />
+
+                <LinearLayout
+                    android:id="@+id/image_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/km_hours_tv"
+                    android:padding="5dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/img_app"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_weight="1"
+                        android:src="@drawable/userapp"
+                        />
+                    <ImageView
+                        android:id="@+id/img_corporate"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_weight="1"
+                        android:src="@drawable/corporate"
+                        />
+                    <ImageView
+                        android:id="@+id/img_webportal"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_weight="1"
+                        android:src="@drawable/webportal"
+                        />
+                    <ImageView
+                        android:id="@+id/img_taxicompany"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_weight="1"
+                        android:src="@drawable/taxicompany"
+                        />
+
+                </LinearLayout>
+
+
+                <TextView
+                    android:id="@+id/agreement_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/image_ll"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:text="@string/agrement"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/agreement"
+                    android:layout_below="@+id/agreement_tv"
+                    android:paddingLeft="@dimen/text_left_padding"
+                    android:text="agreement "
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/fare"
+                    android:layout_marginTop="10dp"
+                    android:textStyle="bold"
+                    android:ems="4"
+                    android:textColor="@color/black"
+                    android:layout_below="@+id/agreement"
+                    android:text="@string/fare"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/fare_tv"
+                    android:layout_marginTop="10dp"
+                    android:layout_toRightOf="@+id/fare"
+                    android:layout_below="@+id/agreement"
+                    android:text="$12"
+                    />
+
+                <LinearLayout
+                    android:id="@+id/source_address_ll"
+                    android:layout_below="@id/fare_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:textStyle="bold"
+                        android:textColor="@color/black"
+                        android:text="@string/source_address"
+                        />
+                    <TextView
+                        android:id="@+id/source_address_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="@dimen/text_left_padding"
+                        android:hint="@string/source_address"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/destination_address_ll"
+                    android:layout_below="@id/source_address_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/destination_address"
+                        android:textStyle="bold"
+                        android:textColor="@color/black"
+                        />
+                    <TextView
+                        android:id="@+id/destination_address_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="@dimen/text_left_padding"
+                        android:text="@string/destination_address"
+                        />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/pickup_time_ll"
+                    android:layout_below="@id/destination_address_ll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/pickup_time"
+                        android:textStyle="bold"
+                        android:ems="4"
+                        android:textColor="@color/black"
+                        />
+                    <TextView
+                        android:id="@+id/pickup_time_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        />
+                </LinearLayout>
+
+
+            </RelativeLayout>
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+
+    </RelativeLayout>
+</ScrollView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/btn_accept_card"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/btn_height"
+        android:layout_weight="1"
+        app:cardCornerRadius="2dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="@color/colorPrimary"
+        android:layout_gravity="center_horizontal"
+        android:layout_alignParentBottom="true">
+        <com.balysv.materialripple.MaterialRippleLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:mrl_rippleBackground="@color/colorPrimary"
+            app:mrl_rippleColor="@color/black">
+    <Button
+        android:id="@+id/btn_accept"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@null"
+        android:layout_gravity="center_horizontal"
+        android:textStyle="bold"
+        android:text="@string/accept"/>
+        </com.balysv.materialripple.MaterialRippleLayout>
+    </android.support.v7.widget.CardView>
+
+    <LinearLayout
+        android:id="@+id/btn_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btn_accept_card"
+        android:layout_marginBottom="@dimen/heading"
+        android:orientation="horizontal">
+
+
+
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/btn_height"
+            android:layout_weight="1"
+            app:cardBackgroundColor="@color/colorPrimary"
+            app:cardCornerRadius="2dp"
+            app:cardElevation="2dp">
+            <com.balysv.materialripple.MaterialRippleLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:mrl_rippleBackground="@color/colorPrimary"
+                app:mrl_rippleColor="@color/black">
+            <Button
+                android:id="@+id/btn_discard"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:layout_gravity="center_horizontal"
+                android:textStyle="bold"
+                android:text="@string/discard" />
+            </com.balysv.materialripple.MaterialRippleLayout>
+            </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/btn_reject_card"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/btn_height"
+            android:layout_weight="1"
+            android:layout_marginLeft="@dimen/heading"
+            app:cardBackgroundColor="@color/colorPrimary"
+            app:cardCornerRadius="2dp"
+            app:cardElevation="2dp">
+            <com.balysv.materialripple.MaterialRippleLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:mrl_rippleBackground="@color/colorPrimary"
+                app:mrl_rippleColor="@color/black">
+            <Button
+                android:id="@+id/btn_reject"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:layout_gravity="center_horizontal"
+                android:textStyle="bold"
+                android:text="@string/reject" />
+            </com.balysv.materialripple.MaterialRippleLayout>
+            </android.support.v7.widget.CardView>
+
+
+
+
+    </LinearLayout>
+
+</RelativeLayout>

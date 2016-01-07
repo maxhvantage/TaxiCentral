@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_activity"
+            android:icon="@drawable/ic_action_home"
+            android:title="Activity" />
+        <item
+            android:id="@+id/nav_trip_history"
+            android:icon="@drawable/ic_action_clock"
+            android:title="Trip History" />
+        <item
+            android:id="@+id/nav_account_statement"
+            android:icon="@drawable/ic_action_key"
+            android:title="Account Statement" />
+        <item
+            android:id="@+id/nav_my_profile"
+            android:icon="@drawable/ic_action_user"
+            android:title="My Profile" />
+        <item
+            android:id="@+id/nav_notification"
+            android:icon="@drawable/ic_action_bell"
+            android:title="Notification" />
+        <item
+            android:id="@+id/nav_news"
+            android:icon="@drawable/ic_action_news"
+            android:title="News" />
+        <item
+            android:id="@+id/nav_anonymous_report"
+            android:icon="@drawable/ic_action_camera"
+            android:title="Anonymous Report" />
+        <item
+            android:id="@+id/nav_bt_paiting"
+            android:icon="@drawable/ic_action_bluetooth"
+            android:title="BT pairing" />
+        <item
+            android:id="@+id/nav_logout"
+            android:icon="@drawable/ic_action_lock_closed"
+            android:title="Logout" />
+    </group>
+
+
+</menu>
