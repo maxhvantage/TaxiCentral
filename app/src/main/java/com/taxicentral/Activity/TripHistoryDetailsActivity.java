@@ -47,7 +47,7 @@ public class TripHistoryDetailsActivity extends AppCompatActivity {
     Trip tripHistory;
     GPSTracker gps;
     double lat, lon;
-
+    //aa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

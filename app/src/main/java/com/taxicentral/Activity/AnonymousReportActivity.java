@@ -45,7 +45,7 @@ public class AnonymousReportActivity extends AppCompatActivity {
     String imageString;
     EditText report_description;
     DialogManager dialogManager;
-
+    //aa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -12,7 +12,7 @@ import com.taxicentral.R;
 import com.taxicentral.Utils.AppPreferences;
 
 public class RecivedMessage extends Activity {
-
+    //aa
     TextView message, header;
     Button btn_ok;
     @Override

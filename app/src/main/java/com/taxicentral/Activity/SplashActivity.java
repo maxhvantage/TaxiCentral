@@ -25,7 +25,7 @@ import java.util.Locale;
 
 public class SplashActivity extends Activity {
 
-
+//aa
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

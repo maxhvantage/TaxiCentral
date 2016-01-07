@@ -54,7 +54,7 @@ import java.util.Locale;
 
 public class NavigationDrawer extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
+    //aa
     User user;
     DBAdapter db;
     ImageView driverimage;

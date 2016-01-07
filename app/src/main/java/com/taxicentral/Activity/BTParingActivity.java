@@ -35,7 +35,7 @@ public class BTParingActivity extends AppCompatActivity {
     private BluetoothSocket socket;
     private UUID uuid = UUID.fromString("a60f35f0-b93a-11de-8a39-08002009c666");
     private static int DISCOVERY_REQUEST = 1;
-
+    //aa
     private ArrayList<BluetoothDevice> foundDevices;
     private ArrayAdapter<BluetoothDevice> aa;
     private ListView list;

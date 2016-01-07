@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NewsActivity extends AppCompatActivity {
-
+    //aa
     ListView news_listview;
     NewsAdapter newsAdapter;
     List<NewsModel> modelsList;

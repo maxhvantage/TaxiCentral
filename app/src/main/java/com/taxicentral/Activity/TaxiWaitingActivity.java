@@ -55,7 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class TaxiWaitingActivity extends AppCompatActivity {
-
+    //aa
     Trip trip;
     TextView name, number, address;
     public static TaxiWaitingActivity instance = null;

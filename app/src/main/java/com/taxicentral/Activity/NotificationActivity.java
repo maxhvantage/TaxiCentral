@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NotificationActivity extends AppCompatActivity {
-
+    //aa
     NotificationAdapter notificationAdapter;
     List<NotificationModel> modelList;
     ListView notify_listview;

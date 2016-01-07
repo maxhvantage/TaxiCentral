@@ -55,7 +55,7 @@ public class CashPaymentActivity extends AppCompatActivity {
         cash_amount_et = (EditText) findViewById(R.id.cash_amount_et);
         btn_pay = (Button) findViewById(R.id.btn_pay);
 
-
+//aa
         fare = Float.parseFloat(distance) * Float.parseFloat(trip.getFare());
 
         Log.d("totalFare", fare+" : "+Float.parseFloat(distance)+" : "+ Float.parseFloat(trip.getFare()));

@@ -16,6 +16,8 @@ import com.taxicentral.Utils.AppPreferences;
 public class AlertDialogActivity extends Activity {
 
     Button btn_showmap;
+
+    //aa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -37,7 +37,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class PaymentActivity extends AppCompatActivity {
-
+    //aa
     Button btn_cancel,btn_payment_ok,btn_cash,btn_credit,btn_cash_ok,btn_paid,btn_unpaid;
     ProgressBar progressBar;
     ImageView confirm_icon;

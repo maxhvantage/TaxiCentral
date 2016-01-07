@@ -57,7 +57,7 @@ import java.util.Locale;
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity {
-
+    //aa
     DBAdapter db;
     GPSTracker gps;
     DialogManager dialogManager;

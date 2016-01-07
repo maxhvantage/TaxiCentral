@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class TripAcceptActivity extends AppCompatActivity {
-
+    //aa
     DialogManager dialogManager;
     Trip trip;
     ImageView call_img;

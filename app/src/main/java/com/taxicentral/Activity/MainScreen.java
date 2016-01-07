@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import static com.google.android.gms.internal.zzir.runOnUiThread;
 
 public class MainScreen extends Fragment {
-
+    //aa
     public static MainScreen instance = null;
     static ImageView gps_icon;
     static ImageView wifi;

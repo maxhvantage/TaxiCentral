@@ -22,7 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class PaymentRecivedActivity extends AppCompatActivity {
-
+    //aa
     Button  btn_continue;
     ImageView confirm_icon;
     TextView waiting_payment_tv, name, number, address;

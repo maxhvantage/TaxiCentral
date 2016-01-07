@@ -25,7 +25,7 @@ import com.taxicentral.R;
 import com.taxicentral.Utils.AppPreferences;
 
 public class ShowMapsActivity extends FragmentActivity  implements LocationListener {
-
+    //aa
     GoogleMap map;
     LocationManager locationManager;
     double lat, lon;

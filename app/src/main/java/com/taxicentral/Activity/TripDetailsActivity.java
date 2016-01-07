@@ -49,7 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class TripDetailsActivity extends AppCompatActivity {
-
+    //aa
     Button btn_reject, btn_accept, btn_discard;
     public static TripDetailsActivity instance = null;
     Trip trip;

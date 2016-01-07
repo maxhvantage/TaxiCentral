@@ -15,7 +15,7 @@ import com.taxicentral.Model.NewsModel;
 import com.taxicentral.R;
 
 public class NewsContentActivity extends AppCompatActivity {
-
+    //aa
     TextView title, discription;
     ImageView newsImage;
     NewsModel news;
