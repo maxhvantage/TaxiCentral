@@ -116,7 +116,6 @@ public class TripStartedActivity extends AppCompatActivity implements LocationLi
         }
         map.setMyLocationEnabled(true);
 
-        //dd
 
         LatLng loc = new LatLng(lat, lon);
         LatLng sourceLocation = new LatLng(trip.getSourceLatitude(), trip.getSourcelogitude());
