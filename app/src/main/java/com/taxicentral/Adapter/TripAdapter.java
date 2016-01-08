@@ -89,7 +89,7 @@ public class TripAdapter extends BaseAdapter {
         TextView agreement = (TextView) convertView.findViewById(R.id.agreement);
         TextView fare_tv = (TextView) convertView.findViewById(R.id.fare_tv);
         TextView destination = (TextView) convertView.findViewById(R.id.destination);
-        Button btn_details = (Button) convertView.findViewById(R.id.btn_details);
+        final Button btn_details = (Button) convertView.findViewById(R.id.btn_details);
         ImageView img_app = (ImageView) convertView.findViewById(R.id.img_app);
         ImageView img_corporate = (ImageView) convertView.findViewById(R.id.img_corporate);
         ImageView img_webportal = (ImageView) convertView.findViewById(R.id.img_webportal);
@@ -108,6 +108,7 @@ public class TripAdapter extends BaseAdapter {
         btn_details.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                btn_details.setClickable(false);
                 if (AppPreferences.getTripId(context).equalsIgnoreCase("")) {
                     Intent intent = new Intent(context, TripDetailsActivity.class);
                     intent.putExtra("tripDetails", tripList.get(position));
@@ -132,6 +133,7 @@ public class TripAdapter extends BaseAdapter {
                     dialogBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             dialog.dismiss();
+                           // btn_details.setClickable(true);
                         }
                     });
 

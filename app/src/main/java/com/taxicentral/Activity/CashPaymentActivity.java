@@ -19,6 +19,7 @@ import com.taxicentral.R;
 import com.taxicentral.Services.ServiceHandler;
 import com.taxicentral.Utils.AppConstants;
 import com.taxicentral.Utils.AppPreferences;
+import com.taxicentral.Utils.DialogManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -81,6 +82,7 @@ public class CashPaymentActivity extends AppCompatActivity {
     View.OnClickListener pay = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+
             String amount = cash_amount_et.getText().toString();
             if(TextUtils.isEmpty(amount)){
                 cash_amount_et.setError("Enter Amount");
@@ -93,9 +95,18 @@ public class CashPaymentActivity extends AppCompatActivity {
 
     private class UserCashPaymentTask extends AsyncTask<Void, Void, String> {
         String amount;
+        DialogManager dialogManager;
         public UserCashPaymentTask(String amount){
             this.amount = amount;
+            dialogManager = new DialogManager();
         }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialogManager.showProcessDialog(CashPaymentActivity.this, "");
+        }
+
         @Override
         protected String doInBackground(Void... params) {
             ServiceHandler serviceHandler = new ServiceHandler();
@@ -127,6 +138,7 @@ public class CashPaymentActivity extends AppCompatActivity {
             }else{
                 btn_pay.setClickable(true);
             }
+            dialogManager.stopProcessDialog();
         }
     }
 

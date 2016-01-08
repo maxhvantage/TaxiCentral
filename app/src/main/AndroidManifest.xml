@@ -15,9 +15,7 @@
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-
     <action android:name="android.location.PROVIDERS_CHANGED" />
-
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
@@ -29,9 +27,6 @@
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="true" />
-    <uses-feature
-        android:glEsVersion="0x00020000"
         android:required="true" />
 
     <!--

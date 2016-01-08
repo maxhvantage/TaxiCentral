@@ -1,9 +1,11 @@
 package com.taxicentral.Activity;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -12,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
@@ -35,6 +38,7 @@ import com.taxicentral.R;
 import com.taxicentral.Services.ServiceHandler;
 import com.taxicentral.Utils.AppConstants;
 import com.taxicentral.Utils.AppPreferences;
+import com.taxicentral.Utils.DialogManager;
 import com.taxicentral.Utils.DirectionsJSONParser;
 import com.taxicentral.Utils.Function;
 
@@ -59,7 +63,7 @@ public class TripStartedActivity extends AppCompatActivity implements LocationLi
     double lat, lon;
     Trip trip;
     String distances = "";
-    TextView distanceTxt,already_paid_tv;
+    TextView distanceTxt, already_paid_tv;
     CardView already_paid_text;
     GPSTracker gps;
 
@@ -70,9 +74,9 @@ public class TripStartedActivity extends AppCompatActivity implements LocationLi
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        distanceTxt = (TextView)findViewById(R.id.text);
-        already_paid_tv = (TextView)findViewById(R.id.already_paid_tv);
-        already_paid_text = (CardView)findViewById(R.id.cardView);
+        distanceTxt = (TextView) findViewById(R.id.text);
+        already_paid_tv = (TextView) findViewById(R.id.already_paid_tv);
+        already_paid_text = (CardView) findViewById(R.id.cardView);
 
         btn_trip_end = (FloatingActionButton) findViewById(R.id.btn_trip_end);
         btn_trip_end.setOnClickListener(tripEnd);
@@ -81,9 +85,9 @@ public class TripStartedActivity extends AppCompatActivity implements LocationLi
 
         trip = getIntent().getParcelableExtra("tripDetails");
 
-        if(AppConstants.CORPORATE.equalsIgnoreCase(trip.getTripType())){
+        if (AppConstants.CORPORATE.equalsIgnoreCase(trip.getTripType())) {
             already_paid_text.setVisibility(View.VISIBLE);
-        }else{
+        } else {
             already_paid_text.setVisibility(View.GONE);
         }
 
@@ -97,8 +101,18 @@ public class TripStartedActivity extends AppCompatActivity implements LocationLi
         lat = gps.getLatitude();
         lon = gps.getLongitude();
 
-        if(lat == 0.0 && lon == 0.0){
+        if (lat == 0.0 && lon == 0.0) {
             showSettingsAlert();
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
         }
         map.setMyLocationEnabled(true);
 
@@ -139,29 +153,9 @@ public class TripStartedActivity extends AppCompatActivity implements LocationLi
             btn_trip_end.setClickable(false);
 
 
-            AppPreferences.setTripId(TripStartedActivity.this, "");
-            AppPreferences.setEndTime(TripStartedActivity.this, Function.getCurrentDateTime());
-            DBAdapter db = new DBAdapter(TripStartedActivity.this);
-            db.deleteTrip(trip.getId());
-
-                if(trip.getTripType().equalsIgnoreCase(AppConstants.CORPORATE)){
-
-                    Intent intent = new Intent(TripStartedActivity.this, PaymentActivity.class);
-                    intent.putExtra("tripDetails", trip);
-                    intent.putExtra("distance", distances);
-                    startActivity(intent);
-                    finish();
 
 
-                }else{
-                    Intent intent = new Intent(TripStartedActivity.this, CashPaymentActivity.class);
-                    //Intent intent = new Intent(TripStartedActivity.this, PaymentActivity.class);
-                    intent.putExtra("tripDetails", trip);
-                    intent.putExtra("distance", distances);
-                    startActivity(intent);
-                    finish();
-                }
-
+            new TripFinishTask().execute();
 
 
 
@@ -380,7 +374,7 @@ Log.d("change Location", lat +" : "+ lon);
                     lineOptions.color(Color.BLUE);
                 }
                 distanceTxt.setText(distance + " - " + duration);
-                distances = distance.replace("km","").replace("m","").replace(" ","");
+                distances = distance.replace("km","").replace("m", "").replace(" ","").replace(",","");
                 map.addPolyline(lineOptions);
             }
         }
@@ -391,6 +385,78 @@ Log.d("change Location", lat +" : "+ lon);
 
         public void setDistanceTime(String distanceTime) {
             this.distanceTime = distanceTime;
+        }
+    }
+
+    private class TripFinishTask extends AsyncTask<Void, Void, Boolean> {
+        float fare;
+        DialogManager dialogManager;
+        public TripFinishTask(){
+            fare = Float.parseFloat(distances) * Float.parseFloat(trip.getFare());
+            dialogManager = new DialogManager();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialogManager.showProcessDialog(TripStartedActivity.this,"");
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                ServiceHandler serviceHandler = new ServiceHandler();
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("driverId", AppPreferences.getDriverId(TripStartedActivity.this));
+                jsonObject.put("tripId", trip.getId());
+                jsonObject.put("latitude", gps.getLatitude());
+                jsonObject.put("longitude", gps.getLongitude());
+                jsonObject.put("totalFare", fare);
+                String json = serviceHandler.makeServiceCall(AppConstants.FINISHTRIP, ServiceHandler.POST, jsonObject);
+                if(json != null){
+                    JSONObject object = new JSONObject(json);
+                    if(object.getString("status").equalsIgnoreCase("200")){
+                        return  true;
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+
+            if(aBoolean) {
+
+                AppPreferences.setTripId(TripStartedActivity.this, "");
+                AppPreferences.setEndTime(TripStartedActivity.this, Function.getCurrentDateTime());
+                DBAdapter db = new DBAdapter(TripStartedActivity.this);
+                db.deleteTrip(trip.getId());
+                if(trip.getTripType().equalsIgnoreCase(AppConstants.CORPORATE)){
+
+                    Intent intent = new Intent(TripStartedActivity.this, PaymentActivity.class);
+                    intent.putExtra("tripDetails", trip);
+                    intent.putExtra("distance", distances);
+                    startActivity(intent);
+                    finish();
+
+
+                }else{
+                    Intent intent = new Intent(TripStartedActivity.this, CashPaymentActivity.class);
+                    //Intent intent = new Intent(TripStartedActivity.this, PaymentActivity.class);
+                    intent.putExtra("tripDetails", trip);
+                    intent.putExtra("distance", distances);
+                    startActivity(intent);
+                    finish();
+                }
+
+            }else {
+                btn_trip_end.setClickable(false);
+            }
+            dialogManager.stopProcessDialog();
         }
     }
 }

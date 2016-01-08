@@ -1,5 +1,6 @@
 package com.taxicentral.Gcm;
 
+import android.app.Activity;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -7,6 +8,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
@@ -25,6 +28,7 @@ import com.taxicentral.Activity.AlertDialogActivity;
 import com.taxicentral.Activity.NavigationDrawer;
 import com.taxicentral.Activity.NotificationActivity;
 import com.taxicentral.Activity.RecivedMessage;
+import com.taxicentral.Activity.TaxiWaitingActivity;
 import com.taxicentral.Database.DBAdapter;
 import com.taxicentral.Model.NotificationModel;
 import com.taxicentral.R;
@@ -68,8 +72,9 @@ public class GCMNotificationIntentService extends IntentService {
 				String registerMessage = 	""+extras.get(Config.LOGIN);
 				String tripCancel = 	""+extras.get(Config.TRIP_CANCEL);
 				String reciveMessage = ""+extras.get(Config.TRIP_RECIVE_MSG);
+				String boarded = ""+extras.get(Config.TRIP_BOARDED);
 
-				Log.d("NOTIFICATION ","registerMessage:"+ registerMessage +" tripCancel: "+ tripCancel +" reciveMessage: "+reciveMessage);
+				Log.d("NOTIFICATION ","registerMessage:"+ registerMessage +" tripCancel: "+ tripCancel +" reciveMessage: "+reciveMessage+" boarded: "+boarded);
 				if(!registerMessage.equalsIgnoreCase("null")){
 					//sendNotification(registerMessage);
 				}else if(!tripCancel.equalsIgnoreCase("null")){
@@ -77,10 +82,44 @@ public class GCMNotificationIntentService extends IntentService {
 				}else if(!reciveMessage.equalsIgnoreCase("null")){
 
 					tripReciveMessage(reciveMessage);
+				}else if(!boarded.equalsIgnoreCase("null")){
+					tripBoardedNotify(boarded);
 				}
 			}
 		}
 		GcmBroadcastReceiver.completeWakefulIntent(intent);
+	}
+
+	private void tripBoardedNotify(String boarded) {
+
+		final Handler mHandler = new Handler(Looper.getMainLooper());
+
+		try {
+			JSONObject jsonObject = new JSONObject(boarded);
+			String alreadyBarded = jsonObject.getString("message");
+			if(alreadyBarded.equalsIgnoreCase("yes") && TaxiWaitingActivity.instance != null){
+
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					mHandler.post(new Runnable() {
+						@Override
+						public void run() {
+							TaxiWaitingActivity.fabBoarded.performClick();
+						}
+					});
+
+				}
+			}).start();
+
+			}else{
+
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+
 	}
 
 	private void tripReciveMessage(String reciveMessage) {
@@ -119,6 +158,7 @@ public class GCMNotificationIntentService extends IntentService {
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			startActivity(intent);
+
 
 		} catch (JSONException e) {
 			e.printStackTrace();

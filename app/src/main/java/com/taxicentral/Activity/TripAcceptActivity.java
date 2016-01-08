@@ -1,12 +1,15 @@
 package com.taxicentral.Activity;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -101,15 +104,25 @@ public class TripAcceptActivity extends AppCompatActivity {
         fabMessage.setOnClickListener(message);
         fabCancel.setOnClickListener(cancel);
 
-    map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
-    gps.getLocation();
-    lat = gps.getLatitude();
-    lon = gps.getLongitude();
+        map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
+        gps.getLocation();
+        lat = gps.getLatitude();
+        lon = gps.getLongitude();
 
-    if (lat == 0.0 && lon == 0.0) {
-        // showSettingsAlert();
-    }
-    map.setMyLocationEnabled(true);
+        if (lat == 0.0 && lon == 0.0) {
+            // showSettingsAlert();
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        map.setMyLocationEnabled(true);
 
     LatLng currentLocation = new LatLng(lat, lon);
     LatLng sourceLocation = new LatLng(trip.getSourceLatitude(), trip.getSourcelogitude());
@@ -580,7 +593,8 @@ public class TripAcceptActivity extends AppCompatActivity {
                         LatLng position = new LatLng(lat, lng);
 
                         points.add(position);
-                        String dis = distance.replace("km","").replace("m","").replace(" ","");
+                        Log.d("distancess", distance);
+                        String dis = distance.replace("km","").replace("m","").replace(" ","").replace(",","");
                         double dist = new Double(dis);
                         if(dist > 15){
                             map.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 6f));

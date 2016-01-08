@@ -1,13 +1,16 @@
 package com.taxicentral.Activity;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -64,6 +67,7 @@ public class TaxiWaitingActivity extends AppCompatActivity {
     private GoogleMap map;
     GPSTracker gps;
     double lat, lon;
+    public static FloatingActionButton fabBoarded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +95,7 @@ public class TaxiWaitingActivity extends AppCompatActivity {
         FloatingActionButton fabCall = (FloatingActionButton) findViewById(R.id.fab_call);
         FloatingActionButton fabMessage = (FloatingActionButton) findViewById(R.id.fab_message);
         FloatingActionButton fabCancel = (FloatingActionButton) findViewById(R.id.fab_cancel);
-        FloatingActionButton fabBoarded = (FloatingActionButton) findViewById(R.id.fab_boarded);
+        fabBoarded = (FloatingActionButton) findViewById(R.id.fab_boarded);
 
         fabCall.setOnClickListener(call);
         fabMessage.setOnClickListener(message);
@@ -104,8 +108,18 @@ public class TaxiWaitingActivity extends AppCompatActivity {
         lat = gps.getLatitude();
         lon = gps.getLongitude();
 
-        if(lat == 0.0 && lon == 0.0){
+        if (lat == 0.0 && lon == 0.0) {
             // showSettingsAlert();
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
         }
         map.setMyLocationEnabled(true);
 
@@ -584,7 +598,7 @@ public class TaxiWaitingActivity extends AppCompatActivity {
 
                         points.add(position);
 
-                        String dis = distance.replace("km","").replace("m","").replace(" ","");
+                        String dis = distance.replace("km","").replace("m", "").replace(" ","").replace(",","");
                         double dist = new Double(dis);
                         if(dist > 15){
                             map.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 6f));

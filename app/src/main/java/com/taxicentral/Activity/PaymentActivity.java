@@ -116,7 +116,7 @@ public class PaymentActivity extends AppCompatActivity {
 
       //  dialogManager.showProcessDialog(PaymentActivity.this, getString(R.string.wait_payment));
 
- /*Timer timer = new Timer();
+ Timer timer = new Timer();
             TimerTask task;
             timer = new Timer();
 
@@ -133,7 +133,7 @@ public class PaymentActivity extends AppCompatActivity {
                     });
 
                 }
-            }, 5000, 5000);*/
+            }, 5000, 5000);
 
 
         btn_payment_ok.setOnClickListener(new View.OnClickListener() {
@@ -166,11 +166,10 @@ public class PaymentActivity extends AppCompatActivity {
                 float totalFare = fare;
 
 
-
             }
         });
 
-        new TripFinishTask().execute();
+
 
     }
 
@@ -208,8 +207,8 @@ public class PaymentActivity extends AppCompatActivity {
             }else{
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(PaymentActivity.this);
-                builder.setTitle("Warring !");
-                builder.setMessage("Your credit balance is low please select other option");
+                builder.setTitle(R.string.warning);
+                builder.setMessage(R.string.credit_balance_low);
                 builder.setCancelable(false);
                 builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                     @Override
@@ -240,8 +239,8 @@ public class PaymentActivity extends AppCompatActivity {
             }else{
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(PaymentActivity.this);
-                builder.setTitle("Warring !");
-                builder.setMessage("Your have available balance please select other option");
+                builder.setTitle(R.string.warning);
+                builder.setMessage(R.string.you_have_avl_balance);
                 builder.setCancelable(false);
                 builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                     @Override
@@ -370,44 +369,5 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
 
-    private class TripFinishTask extends AsyncTask<Void, Void, Boolean> {
 
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            try {
-                ServiceHandler serviceHandler = new ServiceHandler();
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("driverId", AppPreferences.getDriverId(PaymentActivity.this));
-                jsonObject.put("tripId", trip.getId());
-                jsonObject.put("latitude", gps.getLatitude());
-                jsonObject.put("longitude", gps.getLongitude());
-                jsonObject.put("totalFare", fare);
-                String json = serviceHandler.makeServiceCall(AppConstants.FINISHTRIP, ServiceHandler.POST, jsonObject);
-                if(json != null){
-                    JSONObject object = new JSONObject(json);
-                    if(object.getString("status").equalsIgnoreCase("200")){
-                        return  true;
-                    }
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean aBoolean) {
-            super.onPostExecute(aBoolean);
-
-            if(aBoolean) {
-                progressBar.setVisibility(View.GONE);
-                waiting_payment_tv.setVisibility(View.GONE);
-                show_payment_layout.setVisibility(View.VISIBLE);
-
-
-            }else {
-                new TripFinishTask().execute();
-            }
-        }
-    }
 }

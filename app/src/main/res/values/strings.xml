@@ -101,7 +101,7 @@
     <string name="thanksyou">Thank you</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_alert_dialog">Alert</string>
-    <string name="warning">WARNING!</string>
+    <string name="warning">WARNING !</string>
     <string name="show_map">Show Map</string>
     <string name="title_activity_show_maps">Map</string>
     <string name="title_activity_btparing">BT Paring</string>
@@ -161,5 +161,7 @@
     <string name="pay">Pay</string>
     <string name="km">KM</string>
     <string name="received_message">Received Message</string>
+    <string name="credit_balance_low">Your credit balance is low please select other option</string>
+    <string name="you_have_avl_balance">Your have available balance please select other option</string>
 
 </resources>

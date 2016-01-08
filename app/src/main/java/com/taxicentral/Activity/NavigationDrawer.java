@@ -115,8 +115,8 @@ public class NavigationDrawer extends AppCompatActivity
                 .error(R.drawable.ic_action_user)
                 .resize(200, 200)
                 .into(driverimage);
-
-        openHomeActivity();
+        data = getIntent().getStringExtra("notificationData");
+        openHomeActivity(data);
     }
 
     @Override
@@ -165,7 +165,8 @@ public class NavigationDrawer extends AppCompatActivity
         navigationView.getMenu().findItem(R.id.nav_activity).setChecked(true);
 
         if (id == R.id.nav_activity) {
-            openHomeActivity();
+            data= null;
+            openHomeActivity(data);
         } else if (id == R.id.nav_trip_history) {
             Intent intent = new Intent(instance, TripHistoryActivity.class);
             startActivity(intent);
@@ -235,13 +236,13 @@ public class NavigationDrawer extends AppCompatActivity
         return true;
     }
 
-   public void openHomeActivity() {
+   public void openHomeActivity(String data1) {
 
-       data = getIntent().getStringExtra("notificationData");
-       if( data!= null){
+
+       if( data1!= null){
 
            try {
-               JSONObject object = new JSONObject(data);
+               JSONObject object = new JSONObject(data1);
                String trip_id = object.getString("trip_id");
                String message = object.getString("canceltaxirequest");
 
