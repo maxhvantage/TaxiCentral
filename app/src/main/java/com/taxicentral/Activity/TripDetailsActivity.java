@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.taxicentral.Classes.GPSTracker;
+import com.taxicentral.Database.DBAdapter;
 import com.taxicentral.Model.Trip;
 import com.taxicentral.R;
 import com.taxicentral.Services.ServiceHandler;
@@ -43,6 +44,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -57,6 +59,7 @@ public class TripDetailsActivity extends AppCompatActivity {
     DialogManager dialogManager;
     GPSTracker gps;
     CardView btn_reject_card;
+    String routeDistance="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +79,7 @@ public class TripDetailsActivity extends AppCompatActivity {
         TextView agreement = (TextView) findViewById(R.id.agreement);
         TextView fare_tv = (TextView) findViewById(R.id.fare_tv);
         TextView source_address = (TextView) findViewById(R.id.source_address_tv);
+        TextView desti_tv = (TextView) findViewById(R.id.desti_tv);
         TextView destination_address = (TextView) findViewById(R.id.destination_address_tv);
         TextView pickup_time = (TextView) findViewById(R.id.pickup_time_tv);
         ImageView img_app = (ImageView) findViewById(R.id.img_app);
@@ -96,21 +100,37 @@ public class TripDetailsActivity extends AppCompatActivity {
 
         trip = getIntent().getParcelableExtra("tripDetails");
 
+        if(String.valueOf(trip.getDestinationLatitude()).equalsIgnoreCase("") || String.valueOf(trip.getDestinationLogitude()).equalsIgnoreCase("")){
+            trip.setDestinationLatitude(gps.getLatitude());
+            trip.setDestinationLogitude(gps.getLongitude());
+        }
+
 Log.d("latlngg so", trip.getSourceLatitude()+" : "+ trip.getSourcelogitude());
         Log.d("latlngg de", trip.getDestinationLatitude()+" : "+ trip.getDestinationLogitude());
         LatLng sourceLocation = new LatLng(trip.getSourceLatitude(), trip.getSourcelogitude());
         LatLng destinationLocation = new LatLng(trip.getDestinationLatitude(), trip.getDestinationLogitude());
-        String url = Function.getDirectionsUrl(sourceLocation, destinationLocation);
-        RoutesDownloadTask downloadTask = new RoutesDownloadTask(TripDetailsActivity.this);
-        downloadTask.execute(url);
 
-        km_hours_tv.setText(AppPreferences.getDistanceTime(TripDetailsActivity.this));
+        /*String url = Function.getDirectionsUrl(sourceLocation, destinationLocation);
+        RoutesDownloadTask downloadTask = new RoutesDownloadTask(TripDetailsActivity.this);
+        downloadTask.execute(url);*/
+
+        //km_hours_tv.setText(AppPreferences.getDistanceTime(TripDetailsActivity.this));
         //AppPreferences.setDistanceTime(TripDetailsActivity.this, "");
 
-        //km_hours_tv.setText(trip.getDistance()+" - "+ trip.getTravelTime());
+        km_hours_tv.setText(trip.getDistance());
         agreement.setText(trip.getAgreement());
-        fare_tv.setText(getString(R.string.currency) + trip.getFare() + getString(R.string.per_km));
+       // fare_tv.setText(getString(R.string.currency) + trip.getFare() + getString(R.string.per_km));
+        if(trip.getTripType().equalsIgnoreCase(AppConstants.CORPORATE)){
+            fare_tv.setText(getString(R.string.currency) + trip.getFare());
+        }else {
+            fare_tv.setText(getString(R.string.currency) + trip.getFare() + getString(R.string.per_km));
+        }
         source_address.setText(trip.getSourceAddress());
+        if(trip.getDestinationAddress().equalsIgnoreCase("")){
+            desti_tv.setVisibility(View.GONE);
+        }else{
+            desti_tv.setVisibility(View.VISIBLE);
+        }
         destination_address.setText(trip.getDestinationAddress());
         if(AppConstants.TAXI_COMPANY.equalsIgnoreCase(trip.getTripType())){
             btn_reject_card.setVisibility(View.VISIBLE);
@@ -158,7 +178,12 @@ Log.d("latlngg so", trip.getSourceLatitude()+" : "+ trip.getSourcelogitude());
         }
 
         Log.d("corporateType", trip.getCorporateType()+"");
+
+
+
     }
+
+
 
     View.OnClickListener reject = new View.OnClickListener() {
         @Override
@@ -221,9 +246,13 @@ Log.d("latlngg so", trip.getSourceLatitude()+" : "+ trip.getSourcelogitude());
     View.OnClickListener accepct = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            btn_accept.setClickable(false);
-            new AcceptTripTask().execute();
 
+         //   if(!routeDistance.equalsIgnoreCase("")) {
+                btn_accept.setClickable(false);
+                new AcceptTripTask().execute();
+           /* }else{
+                Snackbar.make(findViewById(android.R.id.content), R.string.not_route,Snackbar.LENGTH_LONG).show();
+            }*/
         }
     };
 
@@ -330,7 +359,7 @@ Log.d("latlngg so", trip.getSourceLatitude()+" : "+ trip.getSourcelogitude());
                         JSONObject jsonObj = object.getJSONObject("result");
 
                         String avl_credit = jsonObj.getString("avl_credit");
-                        if(!avl_credit.equalsIgnoreCase("")) {
+                        if(!avl_credit.equalsIgnoreCase("") ) {
                             AppPreferences.setAvlCredit(TripDetailsActivity.this, Float.parseFloat(avl_credit));
                         }
                         return 200;
@@ -344,6 +373,8 @@ Log.d("latlngg so", trip.getSourceLatitude()+" : "+ trip.getSourcelogitude());
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
+            } catch (Exception e){
+                e.printStackTrace();
             }
             return 0;
         }
@@ -356,12 +387,16 @@ Log.d("latlngg so", trip.getSourceLatitude()+" : "+ trip.getSourcelogitude());
                 Snackbar.make(findViewById(android.R.id.content), R.string.trip_already_alloted,Snackbar.LENGTH_LONG).show();
                 dialogManager.stopProcessDialog();
             }else if(responseCode == 200){
+                DBAdapter db = new DBAdapter(instance);
+                db.insertTrip(trip);
                 AppPreferences.setTripId(TripDetailsActivity.this, String.valueOf(trip.getId()));
                 AppPreferences.setStartTime(TripDetailsActivity.this, Function.getCurrentDateTime());
                 Intent intent = new Intent(TripDetailsActivity.this, TripAcceptActivity.class);
                 intent.putExtra("tripDetails", trip);
                 startActivity(intent);
                 finish();
+
+                MainScreen.instance.getActivity().finish();
                 dialogManager.stopProcessDialog();
             }else if(responseCode == 300){
                 btn_accept.setClickable(true);
@@ -527,6 +562,7 @@ Log.d("latlngg so", trip.getSourceLatitude()+" : "+ trip.getSourcelogitude());
 
                     }
                     km_hours_tv.setText(distance + " - " + duration);
+                    routeDistance = distance;
                 }
 
             }

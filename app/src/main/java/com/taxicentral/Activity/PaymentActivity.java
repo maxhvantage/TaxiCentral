@@ -90,11 +90,17 @@ public class PaymentActivity extends AppCompatActivity {
         name.setText(trip.getCustomerName());
         number.setText(trip.getNumber());
         address.setText(trip.getSourceAddress());
-        avl_credit.setText(getString(R.string.currency)+" "+String.valueOf(AppPreferences.getAvlCredit(PaymentActivity.this)));
+        avl_credit.setText(getString(R.string.currency) + " " + String.valueOf(AppPreferences.getAvlCredit(PaymentActivity.this)));
 
 
         Log.d("distancess", distance);
-        fare = Float.parseFloat(distance) * Float.parseFloat(trip.getFare());
+        if(Float.parseFloat(distance) > 1.0){
+            fare = Float.parseFloat(distance) * Float.parseFloat(trip.getFare());
+        }else{
+            fare = Float.parseFloat("1.0") * Float.parseFloat(trip.getFare());
+        }
+
+
 
         show_payment.setText(String.valueOf(fare));
         show_distance.setText(distance+" "+getString(R.string.km));
@@ -277,7 +283,7 @@ public class PaymentActivity extends AppCompatActivity {
             try {
                 Date date1 = simpleDateFormat.parse(startTime);
                 Date date2 = simpleDateFormat.parse(arrivedTime);
-                watingTime = printDifference(date1, date2);
+                watingTime = Function.printDifference(date1, date2);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -330,43 +336,7 @@ public class PaymentActivity extends AppCompatActivity {
         }
     }
 
-    public String printDifference(Date startDate, Date endDate){
 
-        //milliseconds
-        long different = endDate.getTime() - startDate.getTime();
-
-        System.out.println("startDate : " + startDate);
-        System.out.println("endDate : "+ endDate);
-        System.out.println("different : " + different);
-
-        long secondsInMilli = 1000;
-        long minutesInMilli = secondsInMilli * 60;
-        long hoursInMilli = minutesInMilli * 60;
-        long daysInMilli = hoursInMilli * 24;
-
-        long elapsedDays = different / daysInMilli;
-        different = different % daysInMilli;
-
-        long elapsedHours = different / hoursInMilli;
-        different = different % hoursInMilli;
-
-        long elapsedMinutes = different / minutesInMilli;
-        different = different % minutesInMilli;
-
-        long elapsedSeconds = different / secondsInMilli;
-
-        System.out.printf(
-                "%d days, %d hours, %d minutes, %d seconds%n",
-                elapsedDays,
-                elapsedHours, elapsedMinutes, elapsedSeconds);
-
-        String difference = elapsedHours+" hours, "+ elapsedMinutes+" minutes, "+ elapsedSeconds+" seconds";
-
-
-
-        return difference;
-
-    }
 
 
 

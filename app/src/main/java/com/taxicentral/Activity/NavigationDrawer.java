@@ -1,10 +1,7 @@
 package com.taxicentral.Activity;
 
-import android.app.Dialog;
-import android.app.Notification;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -13,7 +10,6 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -21,24 +17,18 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.taxicentral.Database.DBAdapter;
-import com.taxicentral.Model.NotificationModel;
 import com.taxicentral.Model.User;
 import com.taxicentral.R;
-import com.taxicentral.Services.GetTripServices;
 import com.taxicentral.Services.ServiceHandler;
 import com.taxicentral.Services.UpdateLocationToServer;
 import com.taxicentral.Services.ZoneControlServices;
@@ -49,8 +39,6 @@ import com.taxicentral.Utils.Function;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Locale;
 
 public class NavigationDrawer extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -81,6 +69,8 @@ public class NavigationDrawer extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
+
+
         navigationView = (NavigationView) findViewById(R.id.nav_view);
 
         navigationView.setNavigationItemSelectedListener(this);
@@ -92,17 +82,34 @@ public class NavigationDrawer extends AppCompatActivity
         driverName = (TextView) headerLayout.findViewById(R.id.driver_tv);
 
 
-        if(!Function.isServiceRunning(instance, "com.taxicentral.Services.ZoneControlServices")){
-            startService(new Intent(instance, ZoneControlServices.class));
+        if(Function.isServiceRunning(instance, "com.taxicentral.Services.ZoneControlServices")){
+        stopService(new Intent(instance, ZoneControlServices.class));
+
         }
+        startService(new Intent(instance, ZoneControlServices.class));
+        ZoneControlServices.stopZoneControlServices = false;
+
         if(!Function.isServiceRunning(instance, "com.taxicentral.Services.UpdateLocationToServer")){
             startService(new Intent(instance, UpdateLocationToServer.class));
         }
         if(!Function.isServiceRunning(instance, "com.taxicentral.Services.GetTripServices")){
            // startService(new Intent(instance, GetTripServices.class));
         }
+        if(!Function.isServiceRunning(instance, "com.taxicentral.Services.ZoneControlServices")){
+            //startService(new Intent(instance, ZoneControlServices.class));
+          /*  Intent intent = new Intent(instance, ZoneControlServices.class);
+            intent.putExtra("vertices", AppPreferences.getVertices(NavigationDrawer.this));
+            startService(intent);*/
+        }
 
+/*
+Log.d("zone",AppPreferences.isShowDialog(NavigationDrawer.this)+"nav");
 
+        if(AppPreferences.isShowDialog(NavigationDrawer.this)){
+            Intent intent = new Intent(NavigationDrawer.this, AlertDialogActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }*/
 
         dialogManager = new DialogManager();
 
@@ -117,6 +124,9 @@ public class NavigationDrawer extends AppCompatActivity
                 .into(driverimage);
         data = getIntent().getStringExtra("notificationData");
         openHomeActivity(data);
+
+
+
     }
 
     @Override
@@ -125,8 +135,30 @@ public class NavigationDrawer extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+
+           // super.onBackPressed();
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(NavigationDrawer.this);
+            builder.setTitle(getString(R.string.exit));
+            builder.setMessage(getString(R.string.exit_message));
+            builder.setCancelable(false);
+            builder.setPositiveButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    finish();
+
+                }
+            });
+
+            builder.setNegativeButton(getResources().getString(R.string.no), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.dismiss();
+                }
+            });
+            builder.show();
         }
+
     }
 
     @Override
@@ -187,6 +219,9 @@ public class NavigationDrawer extends AppCompatActivity
             startActivity(intent);
         } else if (id == R.id.nav_bt_paiting) {
             Intent intent = new Intent(instance, BTParingActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_updates) {
+            Intent intent = new Intent(instance, Updates.class);
             startActivity(intent);
         } else if (id == R.id.nav_logout) {
 
@@ -320,6 +355,7 @@ public class NavigationDrawer extends AppCompatActivity
                 ServiceHandler serviceHandler = new ServiceHandler();
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("driverId", String.valueOf(AppPreferences.getDriverId(instance)));
+                jsonObject.put("dateTime", Function.getCurrentDateTime());
                 String json = serviceHandler.makeServiceCall(AppConstants.LOGOUT, ServiceHandler.POST, jsonObject);
                 if(json != null){
                     JSONObject object = new JSONObject(json);
@@ -339,12 +375,16 @@ public class NavigationDrawer extends AppCompatActivity
             if(status){
                 stopService(new Intent(instance, ZoneControlServices.class));
                 stopService(new Intent(instance, UpdateLocationToServer.class));
-                //stopService(new Intent(instance, GetTripServices.class));
-                GetTripServices.shouldContinue = false;
+                ////stopService(new Intent(instance, GetTripServices.class));
+                ZoneControlServices.stopZoneControlServices = true;
+                //AppPreferences.setShowDialog(instance, false);
+               // AppPreferences.setVertices(instance, new ArrayList<String>());
+                ////GetTripServices.shouldContinue = false;
                 AppPreferences.setDriverId(instance, 0);
-                db.deleteAllTrip();
+                //db.deleteAllTrip();
                 dialogManager.stopProcessDialog();
                 Intent intent = new Intent(instance, LoginActivity.class);
+                intent.setAction("0");
                 startActivity(intent);
                 finish();
             }else{
@@ -357,6 +397,9 @@ public class NavigationDrawer extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        AppPreferences.setShowDialog(instance, false);
+       // AppPreferences.setShowDialog(instance, false);
     }
+
+
+
 }

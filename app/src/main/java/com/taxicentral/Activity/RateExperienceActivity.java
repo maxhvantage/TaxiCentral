@@ -1,5 +1,6 @@
 package com.taxicentral.Activity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -35,7 +36,7 @@ public class RateExperienceActivity extends AppCompatActivity {
     RatingBar ratingBar;
     DialogManager dialogManager;
     Trip trip;
-    TextView name, number, address;
+    TextView name,  address;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,11 +52,11 @@ public class RateExperienceActivity extends AppCompatActivity {
         btn_rate = (Button) findViewById(R.id.btn_rate);
         ratingBar = (RatingBar) findViewById(R.id.rate);
         name = (TextView) findViewById(R.id.name);
-        number = (TextView) findViewById(R.id.number);
+       // number = (TextView) findViewById(R.id.number);
         address = (TextView) findViewById(R.id.address);
 
         name.setText(trip.getCustomerName());
-        number.setText(trip.getNumber());
+      //  number.setText(trip.getNumber());
         address.setText(trip.getSourceAddress());
 
         btn_rate.setOnClickListener(rate);
@@ -69,6 +70,9 @@ public class RateExperienceActivity extends AppCompatActivity {
     View.OnClickListener skip = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+
+            Intent intent = new Intent(RateExperienceActivity.this, NavigationDrawer.class);
+            startActivity(intent);
             finish();
         }
     };
@@ -127,6 +131,8 @@ public class RateExperienceActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
             if(aBoolean){
+                Intent intent = new Intent(RateExperienceActivity.this, NavigationDrawer.class);
+                startActivity(intent);
                 finish();
             }else{
                 runOnUiThread(new Runnable() {

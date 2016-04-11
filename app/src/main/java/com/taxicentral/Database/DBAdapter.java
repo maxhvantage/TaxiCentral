@@ -14,6 +14,7 @@ import com.taxicentral.Model.User;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class DBAdapter extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
@@ -59,6 +60,10 @@ public class DBAdapter extends SQLiteOpenHelper {
     public static final String KEY_NOTIFY_HEADING = "notify_heading";
     public static final String KEY_DESCRIPTION = "description";
     public static final String KEY_HISTORY_MONTH = "history_month";
+    public static final String KEY_CUSTOMER_RATING = "KEY_CUSTOMER_RATING";
+
+    /*Account Statment*/
+
 
 
     private static final String CREATE_TBL_LOCATION = "create table "
@@ -114,6 +119,7 @@ public class DBAdapter extends SQLiteOpenHelper {
             + KEY_TRIPTYPE + " text null,"
             + KEY_HISTORY_MONTH + " text null,"
             + KEY_CUSTOMER_NAME + " text null,"
+            + KEY_CUSTOMER_RATING + " text null,"
             + KEY_CUSTOMER_IMAGE + " text null,"
             + KEY_SOURCEADDRESS + " text null,"
             + KEY_DESTINATIONADDRESS + " text null,"
@@ -285,46 +291,9 @@ public class DBAdapter extends SQLiteOpenHelper {
         initialValues.put(KEY_DESTINATIONLATITUDE,trip.getDestinationLatitude());
         initialValues.put(KEY_DESTINATIONLOGITUDE,trip.getDestinationLogitude());
         initialValues.put(KEY_HISTORY_MONTH,trip.getMonth());
+        initialValues.put(KEY_CUSTOMER_RATING,trip.getCustomerRating());
 
         long id = db.insert(TBL_TRIP_HISTORY, null, initialValues);
-
-        db.close();
-        return id;
-    }
-
-    public long updateTrip(Trip trip) {
-
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues initialValues = new ContentValues();
-        initialValues.put(KEY_DISTANCE, trip.getDistance());
-
-        long id = db.update(TBL_TRIP, initialValues, KEY_TRIP_ID + " = ?",
-                new String[]{String.valueOf(trip.getId())});
-
-        db.close();
-        return id;
-    }
-
-    public long updateTripHistory(Trip trip) {
-
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues initialValues = new ContentValues();
-        initialValues.put(KEY_DATE, trip.getDate());
-        initialValues.put(KEY_TRIPTYPE,trip.getTripType());
-        initialValues.put(KEY_CUSTOMER_NAME,trip.getCustomerName());
-        initialValues.put(KEY_CUSTOMER_IMAGE,trip.getCustomerImage());
-        initialValues.put(KEY_SOURCEADDRESS,trip.getSourceAddress());
-        initialValues.put(KEY_DESTINATIONADDRESS,trip.getDestinationAddress());
-        initialValues.put(KEY_SOURCELATITUDE,trip.getSourceLatitude());
-        initialValues.put(KEY_SOURCELOGITUDE,trip.getSourcelogitude());
-        initialValues.put(KEY_DESTINATIONLATITUDE,trip.getDestinationLatitude());
-        initialValues.put(KEY_DESTINATIONLOGITUDE,trip.getDestinationLogitude());
-        initialValues.put(KEY_HISTORY_MONTH,trip.getMonth());
-
-        long id = db.update(TBL_TRIP_HISTORY, initialValues, KEY_TRIP_ID + " = ?",
-                new String[]{String.valueOf(trip.getId())});
 
         db.close();
         return id;
@@ -644,6 +613,7 @@ public class DBAdapter extends SQLiteOpenHelper {
                             .getColumnIndex(KEY_DESTINATIONLATITUDE)));
                     trip.setDestinationLogitude(cursor.getDouble(cursor
                             .getColumnIndex(KEY_DESTINATIONLOGITUDE)));
+                    trip.setCustomerRating(cursor.getFloat(cursor.getColumnIndex(KEY_CUSTOMER_RATING)));
 
 
                     tripList.add(trip);
@@ -663,7 +633,7 @@ public class DBAdapter extends SQLiteOpenHelper {
 
         ArrayList<Trip> tripList = new ArrayList<Trip>();
         try {
-            String query = "select * from " + TBL_TRIP_HISTORY +" where "+KEY_DATE+" between '"+ fromDate+"' and '"+ toDate + "' ORDER BY "+KEY_TRIP_ID+" DESC;";
+            String query = "select * from " + TBL_TRIP_HISTORY +" where "+KEY_DATE+" between '"+ fromDate+" 00:00:00"+"' and '"+ toDate +" 23:59:59"+ "' ORDER BY "+KEY_TRIP_ID+" DESC;";
             System.out.println("query : " + query);
             SQLiteDatabase db = this.getReadableDatabase();
             Cursor cursor = db.rawQuery(query, null);
@@ -700,6 +670,7 @@ public class DBAdapter extends SQLiteOpenHelper {
                             .getColumnIndex(KEY_DESTINATIONLATITUDE)));
                     trip.setDestinationLogitude(cursor.getDouble(cursor
                             .getColumnIndex(KEY_DESTINATIONLOGITUDE)));
+                    trip.setCustomerRating(cursor.getFloat(cursor.getColumnIndex(KEY_CUSTOMER_RATING)));
 
 
                     tripList.add(trip);
@@ -756,6 +727,7 @@ public class DBAdapter extends SQLiteOpenHelper {
                             .getColumnIndex(KEY_DESTINATIONLATITUDE)));
                     trip.setDestinationLogitude(cursor.getDouble(cursor
                             .getColumnIndex(KEY_DESTINATIONLOGITUDE)));
+                    trip.setCustomerRating(cursor.getFloat(cursor.getColumnIndex(KEY_CUSTOMER_RATING)));
 
 
                     tripList.add(trip);
@@ -776,7 +748,7 @@ public class DBAdapter extends SQLiteOpenHelper {
 
         ArrayList<Trip> tripList = new ArrayList<Trip>();
         try {
-            String query = "select * from " + TBL_TRIP_HISTORY +" where "+KEY_HISTORY_MONTH+" = '"+month+"' and "+KEY_DATE+" between '"+ fromDate+"' and '"+ toDate + "' ORDER BY "+KEY_TRIP_ID+" DESC;";
+            String query = "select * from " + TBL_TRIP_HISTORY +" where "+KEY_HISTORY_MONTH+" = '"+month+"' and "+KEY_DATE+" between '"+ fromDate+" 00:00:00"+"' and '"+ toDate +" 23:59:59"+ "' ORDER BY "+KEY_TRIP_ID+" DESC;";
             System.out.println("query : " + query);
             SQLiteDatabase db = this.getReadableDatabase();
             Cursor cursor = db.rawQuery(query, null);
@@ -813,6 +785,7 @@ public class DBAdapter extends SQLiteOpenHelper {
                             .getColumnIndex(KEY_DESTINATIONLATITUDE)));
                     trip.setDestinationLogitude(cursor.getDouble(cursor
                             .getColumnIndex(KEY_DESTINATIONLOGITUDE)));
+                    trip.setCustomerRating(cursor.getFloat(cursor.getColumnIndex(KEY_CUSTOMER_RATING)));
 
 
                     tripList.add(trip);
@@ -829,39 +802,7 @@ public class DBAdapter extends SQLiteOpenHelper {
 
     }
 
-    public ArrayList<Integer> getTripIdFromTripHistory() {
 
-        ArrayList<Integer> tripList = new ArrayList<Integer>();
-        try {
-            String query = "select * from " + TBL_TRIP_HISTORY + " ORDER BY "+ID+" DESC;";
-            System.out.println("query : " + query);
-            SQLiteDatabase db = this.getReadableDatabase();
-            Cursor cursor = db.rawQuery(query, null);
-            if (cursor == null) {
-                return tripList;
-            } else if (cursor.getCount() == 0) {
-                return tripList;
-            }
-            if (cursor.moveToFirst()) {
-
-                do {
-                    /*Trip trip = new Trip();
-                    trip.setId(cursor.getLong(cursor.getColumnIndex(ID)));
-                    */
-
-                    tripList.add(cursor.getInt(cursor.getColumnIndex(KEY_TRIP_ID)));
-                } while (cursor.moveToNext());
-            }
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-            db.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return tripList;
-
-    }
 
     public boolean deleteLocation(int id) {
         SQLiteDatabase db = this.getWritableDatabase();

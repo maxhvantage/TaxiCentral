@@ -5,39 +5,43 @@
         <item
             android:id="@+id/nav_activity"
             android:icon="@drawable/ic_action_home"
-            android:title="Activity" />
+            android:title="@string/nav_activity" />
         <item
             android:id="@+id/nav_trip_history"
             android:icon="@drawable/ic_action_clock"
-            android:title="Trip History" />
+            android:title="@string/nav_triphistory" />
         <item
             android:id="@+id/nav_account_statement"
             android:icon="@drawable/ic_action_key"
-            android:title="Account Statement" />
+            android:title="@string/nav_accountstatment" />
         <item
             android:id="@+id/nav_my_profile"
             android:icon="@drawable/ic_action_user"
-            android:title="My Profile" />
+            android:title="@string/nav_myprofile" />
         <item
             android:id="@+id/nav_notification"
             android:icon="@drawable/ic_action_bell"
-            android:title="Notification" />
+            android:title="@string/nav_notification" />
         <item
             android:id="@+id/nav_news"
             android:icon="@drawable/ic_action_news"
-            android:title="News" />
+            android:title="@string/nav_news" />
         <item
             android:id="@+id/nav_anonymous_report"
             android:icon="@drawable/ic_action_camera"
-            android:title="Anonymous Report" />
+            android:title="@string/nav_anonymousreport" />
         <item
             android:id="@+id/nav_bt_paiting"
             android:icon="@drawable/ic_action_bluetooth"
-            android:title="BT pairing" />
+            android:title="@string/nav_btparing" />
+        <item
+            android:id="@+id/nav_updates"
+            android:icon="@drawable/ic_action_clock"
+            android:title="@string/nav_update" />
         <item
             android:id="@+id/nav_logout"
             android:icon="@drawable/ic_action_lock_closed"
-            android:title="Logout" />
+            android:title="@string/nav_logout" />
     </group>
 
 

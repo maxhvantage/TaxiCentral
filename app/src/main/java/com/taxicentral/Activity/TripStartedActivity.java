@@ -1,11 +1,9 @@
 package com.taxicentral.Activity;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -14,7 +12,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
@@ -29,6 +26,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.taxicentral.Classes.GPSTracker;
@@ -56,14 +54,14 @@ import java.util.HashMap;
 import java.util.List;
 
 public class TripStartedActivity extends AppCompatActivity implements LocationListener {
-    //aa
+
     FloatingActionButton btn_trip_end;
     GoogleMap map;
     LocationManager locationManager;
     double lat, lon;
     Trip trip;
     String distances = "";
-    TextView distanceTxt, already_paid_tv;
+    TextView distanceTxt,already_paid_tv;
     CardView already_paid_text;
     GPSTracker gps;
 
@@ -74,9 +72,9 @@ public class TripStartedActivity extends AppCompatActivity implements LocationLi
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        distanceTxt = (TextView) findViewById(R.id.text);
-        already_paid_tv = (TextView) findViewById(R.id.already_paid_tv);
-        already_paid_text = (CardView) findViewById(R.id.cardView);
+        distanceTxt = (TextView)findViewById(R.id.text);
+        already_paid_tv = (TextView)findViewById(R.id.already_paid_tv);
+        already_paid_text = (CardView)findViewById(R.id.cardView);
 
         btn_trip_end = (FloatingActionButton) findViewById(R.id.btn_trip_end);
         btn_trip_end.setOnClickListener(tripEnd);
@@ -85,9 +83,23 @@ public class TripStartedActivity extends AppCompatActivity implements LocationLi
 
         trip = getIntent().getParcelableExtra("tripDetails");
 
-        if (AppConstants.CORPORATE.equalsIgnoreCase(trip.getTripType())) {
-            already_paid_text.setVisibility(View.VISIBLE);
-        } else {
+        if(String.valueOf(trip.getDestinationLatitude()).equalsIgnoreCase("") || String.valueOf(trip.getDestinationLogitude()).equalsIgnoreCase("")){
+            trip.setDestinationLatitude(gps.getLatitude());
+            trip.setDestinationLogitude(gps.getLongitude());
+        }
+
+        distanceTxt.setVisibility(View.GONE);
+        //distanceTxt.setText(trip.getDistance());
+
+
+        if(AppConstants.CORPORATE.equalsIgnoreCase(trip.getTripType())){
+            if(AppPreferences.getAvlCredit(TripStartedActivity.this)>Float.valueOf(trip.getFare())){
+                already_paid_text.setVisibility(View.VISIBLE);
+            }else{
+                already_paid_text.setVisibility(View.GONE);
+            }
+
+        }else{
             already_paid_text.setVisibility(View.GONE);
         }
 
@@ -101,21 +113,10 @@ public class TripStartedActivity extends AppCompatActivity implements LocationLi
         lat = gps.getLatitude();
         lon = gps.getLongitude();
 
-        if (lat == 0.0 && lon == 0.0) {
+        if(lat == 0.0 && lon == 0.0){
             showSettingsAlert();
         }
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
         map.setMyLocationEnabled(true);
-
 
         LatLng loc = new LatLng(lat, lon);
         LatLng sourceLocation = new LatLng(trip.getSourceLatitude(), trip.getSourcelogitude());
@@ -127,16 +128,17 @@ public class TripStartedActivity extends AppCompatActivity implements LocationLi
         map.addMarker(new MarkerOptions()
                 .position(sourceLocation)
                 .title("Source")
-                .snippet(trip.getSourceAddress()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                .snippet(trip.getSourceAddress()).icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_three)));
         map.addMarker(new MarkerOptions()
                 .position(destinationLocation)
                 .title("Destination")
-                .snippet(trip.getDestinationAddress()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                .snippet(trip.getDestinationAddress()).icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_four)));
 
        /* map.addPolyline((new PolylineOptions())
                 .add(new LatLng(trip.getSourceLatitude(), trip.getSourcelogitude()), new LatLng(trip.getDestinationLatitude(), trip.getDestinationLogitude())
                 ).width(5).color(Color.BLUE)
                 .geodesic(true));*/
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(sourceLocation, 15));
 
         String url = Function.getDirectionsUrl(sourceLocation, destinationLocation);
         RoutesDownloadTask downloadTask = new RoutesDownloadTask(TripStartedActivity.this);
@@ -152,13 +154,21 @@ public class TripStartedActivity extends AppCompatActivity implements LocationLi
         @Override
         public void onClick(View v) {
             btn_trip_end.setClickable(false);
+            AppPreferences.setPaymentmode(TripStartedActivity.this, "");
+            gps.getLocation();
 
+            AppPreferences.setDestilatitude(TripStartedActivity.this, String.valueOf(gps.getLatitude()));
+            AppPreferences.setDestilogitude(TripStartedActivity.this, String.valueOf(gps.getLongitude()));
+            AppPreferences.setDestiaddress(TripStartedActivity.this,
+                    Function.getAddressFromLatlng(TripStartedActivity.this, gps.getLatitude(), gps.getLongitude()));
+
+            Log.d("AddresDlatlng", AppPreferences.getDestiaddress(TripStartedActivity.this) +
+                    "\nlat:" + AppPreferences.getDestilatitude(TripStartedActivity.this) +
+                    "\nlng:" + AppPreferences.getDestilogitude(TripStartedActivity.this));
 
 
 
             new TripFinishTask().execute();
-
-
 
 
         }
@@ -171,7 +181,7 @@ public class TripStartedActivity extends AppCompatActivity implements LocationLi
         lon = location.getLongitude();
 Log.d("change Location", lat +" : "+ lon);
         LatLng loc = new LatLng(lat, lon);
-        map.moveCamera(CameraUpdateFactory.newLatLng(loc));
+       // map.moveCamera(CameraUpdateFactory.newLatLng(loc));
        // map.animateCamera(CameraUpdateFactory.zoomTo(18));
     }
 
@@ -344,7 +354,7 @@ Log.d("change Location", lat +" : "+ lon);
                     //Toast.makeText(ParserTask.this, "No Points", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
                 // Traversing through all the routes
                 for(int i=0;i<result.size();i++){
                     lineOptions = new PolylineOptions();
@@ -369,14 +379,19 @@ Log.d("change Location", lat +" : "+ lon);
 
                         points.add(position);
 
+                        com.google.android.gms.maps.model.LatLng mapPoint =
+                                new com.google.android.gms.maps.model.LatLng(lat, lng);
+                        builder.include(mapPoint);
                     }
                     lineOptions.addAll(points);
                     lineOptions.width(4);
                     lineOptions.color(Color.BLUE);
                 }
-                distanceTxt.setText(distance + " - " + duration);
+               // distanceTxt.setText(distance + " - " + duration);
                 distances = distance.replace("km","").replace("m", "").replace(" ","").replace(",","");
                 map.addPolyline(lineOptions);
+                map.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 0));
+
             }
         }
 
@@ -390,10 +405,10 @@ Log.d("change Location", lat +" : "+ lon);
     }
 
     private class TripFinishTask extends AsyncTask<Void, Void, Boolean> {
-        float fare;
+      //  float fare;
         DialogManager dialogManager;
         public TripFinishTask(){
-            fare = Float.parseFloat(distances) * Float.parseFloat(trip.getFare());
+        //    fare = Float.parseFloat(distances) * Float.parseFloat(trip.getFare());
             dialogManager = new DialogManager();
         }
 
@@ -412,7 +427,13 @@ Log.d("change Location", lat +" : "+ lon);
                 jsonObject.put("tripId", trip.getId());
                 jsonObject.put("latitude", gps.getLatitude());
                 jsonObject.put("longitude", gps.getLongitude());
-                jsonObject.put("totalFare", fare);
+                jsonObject.put("sourcelatitude", AppPreferences.getSourcelatitude(TripStartedActivity.this));
+                jsonObject.put("sourcelongitude", AppPreferences.getSourcelongitude(TripStartedActivity.this));
+                jsonObject.put("sourceaddress", AppPreferences.getSourceaddress(TripStartedActivity.this));
+                jsonObject.put("destinationlatitude", AppPreferences.getDestilatitude(TripStartedActivity.this));
+                jsonObject.put("destinationlongitude", AppPreferences.getSourcelongitude(TripStartedActivity.this));
+                jsonObject.put("destinationaddress", AppPreferences.getDestiaddress(TripStartedActivity.this));
+              //  jsonObject.put("totalFare", fare);
                 String json = serviceHandler.makeServiceCall(AppConstants.FINISHTRIP, ServiceHandler.POST, jsonObject);
                 if(json != null){
                     JSONObject object = new JSONObject(json);
@@ -438,7 +459,8 @@ Log.d("change Location", lat +" : "+ lon);
                 db.deleteTrip(trip.getId());
                 if(trip.getTripType().equalsIgnoreCase(AppConstants.CORPORATE)){
 
-                    Intent intent = new Intent(TripStartedActivity.this, PaymentActivity.class);
+                    //Intent intent = new Intent(TripStartedActivity.this, PaymentActivity.class);
+                    Intent intent = new Intent(TripStartedActivity.this, PaymentRecivedActivity.class);
                     intent.putExtra("tripDetails", trip);
                     intent.putExtra("distance", distances);
                     startActivity(intent);
@@ -446,8 +468,8 @@ Log.d("change Location", lat +" : "+ lon);
 
 
                 }else{
-                    Intent intent = new Intent(TripStartedActivity.this, CashPaymentActivity.class);
-                    //Intent intent = new Intent(TripStartedActivity.this, PaymentActivity.class);
+                    //Intent intent = new Intent(TripStartedActivity.this, CashPaymentActivity.class);
+                    Intent intent = new Intent(TripStartedActivity.this, RateExperienceActivity.class);
                     intent.putExtra("tripDetails", trip);
                     intent.putExtra("distance", distances);
                     startActivity(intent);

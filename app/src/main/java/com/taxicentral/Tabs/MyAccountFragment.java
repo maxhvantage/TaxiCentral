@@ -4,7 +4,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -29,7 +32,7 @@ import java.util.List;
  */
 public class MyAccountFragment extends Fragment {
 
-    ArrayAdapter<String> myPaymentAdapter;
+    public static ArrayAdapter<String> myPaymentAdapter;
     List<String> itemList;
     ListView myPaymentListView;
 
@@ -52,6 +55,9 @@ public class MyAccountFragment extends Fragment {
 
         return view;
     }
+
+
+
     private class getMyAccountTask extends AsyncTask<Void,Void, String> {
         @Override
         protected String doInBackground(Void... params) {
@@ -59,23 +65,30 @@ public class MyAccountFragment extends Fragment {
                 ServiceHandler serviceHandler = new ServiceHandler();
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("driverId", AppPreferences.getDriverId(getActivity()));
-                String json = serviceHandler.makeServiceCall(AppConstants.NEWS, ServiceHandler.POST,jsonObject);
+                String json = serviceHandler.makeServiceCall(AppConstants.ACC_STATE_MYACCOUNT, ServiceHandler.POST,jsonObject);
                 if(json != null){
                     JSONObject jsonObj = new JSONObject(json);
                     if(jsonObj.getString("status").equalsIgnoreCase("200")){
-                        JSONArray jsonArray = jsonObj.getJSONArray("result");
-                        String[] month = {"Jan", "Fab", "Mar", "Apr", "May", "Jun"};
-                        for(int i=0; i<6; i++){
-//                            JSONObject object = jsonArray.getJSONObject(i);
-                            itemList.add(month[i]+" $ 2000 - Paid");
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    myPaymentAdapter.notifyDataSetChanged();
-
-                                }
-                            });
+                        List<String> monthList = new ArrayList<String>();
+                        JSONArray jsonArray = jsonObj.getJSONArray("month");
+                        for(int i=0; i<jsonArray.length(); i++){
+                            JSONObject jsonObject1 = jsonArray.getJSONObject(i);
+                            monthList.add(jsonObject1.getString("name"));
                         }
+                        JSONArray jsonArray1 = jsonObj.getJSONArray("result");
+                        for(int j=0; j<jsonArray1.length(); j++){
+                            JSONObject jsonObject1 = jsonArray1.getJSONObject(j);
+
+                            int amount = 200;
+
+                           //     month = jsonObject1.getInt(monthList.get(j));
+
+
+                            String type = jsonObject1.getString("type");
+                            itemList.add(monthList.get(j)+" - $"+amount+" - "+ type);
+
+                        }
+
                         return "200";
                     }
                 }
@@ -85,5 +98,10 @@ public class MyAccountFragment extends Fragment {
             return "";
         }
 
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            myPaymentAdapter.notifyDataSetChanged();
+        }
     }
 }

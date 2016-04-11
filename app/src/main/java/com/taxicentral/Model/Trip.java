@@ -13,6 +13,7 @@ public class Trip implements Parcelable {
     String distance="", agreement="", fare="", date="", customerName="", customerImage="",travelTime="",
             sourceAddress="", destinationAddress="", month="", number="", tripType="";
     Double sourceLatitude=0.0, sourcelogitude=0.0, destinationLatitude=0.0, destinationLogitude=0.0;
+    float customerRating=0;
     Integer  corporateType=0;
 
     public Trip(){}
@@ -37,6 +38,7 @@ public class Trip implements Parcelable {
         travelTime =  in.readString();
         corporateType = in.readInt();
         customerImage = in.readString();
+        customerRating = in.readFloat();
     }
 
     public static final Creator<Trip> CREATOR = new Creator<Trip>() {
@@ -195,6 +197,14 @@ public class Trip implements Parcelable {
         this.customerImage = customerImage;
     }
 
+    public Float getCustomerRating() {
+        return customerRating;
+    }
+
+    public void setCustomerRating(Float customerRating) {
+        this.customerRating = customerRating;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -220,5 +230,6 @@ public class Trip implements Parcelable {
         dest.writeString(travelTime);
         dest.writeInt(corporateType);
         dest.writeString(customerImage);
+        dest.writeFloat(customerRating);
     }
 }

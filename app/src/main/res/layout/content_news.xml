@@ -15,4 +15,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"></ListView>
 
+    <TextView
+        android:id="@+id/header_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/heading"
+        android:background="@color/black_light"
+        android:text="News"
+        android:textColor="@color/colorPrimary"
+        android:gravity="center"
+        android:visibility="gone"/>
+
 </RelativeLayout>

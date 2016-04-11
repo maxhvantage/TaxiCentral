@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.taxicentral.Adapter.NotificationAdapter;
 import com.taxicentral.Database.DBAdapter;
@@ -24,6 +25,8 @@ public class NotificationActivity extends AppCompatActivity {
     List<NotificationModel> modelList;
     ListView notify_listview;
     DBAdapter db;
+    TextView header_tv;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +39,7 @@ public class NotificationActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         notify_listview = (ListView) findViewById(R.id.notify_listview);
+        header_tv = (TextView) findViewById(R.id.header_tv);
         modelList = new ArrayList<NotificationModel>();
 
         db = new DBAdapter(NotificationActivity.this);
@@ -43,11 +47,23 @@ public class NotificationActivity extends AppCompatActivity {
 
         notificationAdapter = new NotificationAdapter(NotificationActivity.this, modelList);
         notify_listview.setAdapter(notificationAdapter);
+
+        if(modelList.isEmpty()){
+            final String message = getString(R.string.sorry_no_data_found);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    header_tv.setVisibility(View.VISIBLE);
+                    header_tv.setText(message);
+                }
+            });
+
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        onBackPressed();
+       finish();
         return true;
     }
 }

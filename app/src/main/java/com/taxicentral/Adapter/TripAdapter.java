@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +16,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.balysv.materialripple.MaterialRippleLayout;
 import com.google.android.gms.maps.model.LatLng;
+import com.taxicentral.Activity.AlertDialogActivity;
 import com.taxicentral.Activity.TripDetailsActivity;
 import com.taxicentral.Model.Trip;
 import com.taxicentral.R;
@@ -56,7 +59,7 @@ public class TripAdapter extends BaseAdapter {
 
     public void updateResult(ArrayList<Trip> tripList){
         this.tripList = tripList;
-        notifyDataSetChanged();
+        notifyDataSetInvalidated();
     }
     @Override
     public int getCount() {
@@ -75,117 +78,187 @@ public class TripAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        final Trip trip = tripList.get(position);
-        if (inflater == null)
-            inflater = (LayoutInflater) context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if (convertView == null)
-            convertView = inflater.inflate(R.layout.trip_list, null);
+        try {
+            final Trip trip = tripList.get(position);
+            if (inflater == null)
+                inflater = (LayoutInflater) context
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            if (convertView == null)
+                convertView = inflater.inflate(R.layout.trip_list, null);
 
-        km_hours_tv = (TextView) convertView.findViewById(R.id.km_hours_tv);
-        TextView fareText = (TextView) convertView.findViewById(R.id.fare);
-        TextView trip_id = (TextView) convertView.findViewById(R.id.trip_id);
-        TextView agreement_tv = (TextView) convertView.findViewById(R.id.agreement_tv);
-        TextView agreement = (TextView) convertView.findViewById(R.id.agreement);
-        TextView fare_tv = (TextView) convertView.findViewById(R.id.fare_tv);
-        TextView destination = (TextView) convertView.findViewById(R.id.destination);
-        final Button btn_details = (Button) convertView.findViewById(R.id.btn_details);
-        ImageView img_app = (ImageView) convertView.findViewById(R.id.img_app);
-        ImageView img_corporate = (ImageView) convertView.findViewById(R.id.img_corporate);
-        ImageView img_webportal = (ImageView) convertView.findViewById(R.id.img_webportal);
-        ImageView img_taxicompany = (ImageView) convertView.findViewById(R.id.img_taxicompany);
+            km_hours_tv = (TextView) convertView.findViewById(R.id.km_hours_tv);
+            TextView fareText = (TextView) convertView.findViewById(R.id.fare);
+            TextView trip_id = (TextView) convertView.findViewById(R.id.trip_id);
+            TextView agreement_tv = (TextView) convertView.findViewById(R.id.agreement_tv);
+            TextView agreement = (TextView) convertView.findViewById(R.id.agreement);
+            TextView fare_tv = (TextView) convertView.findViewById(R.id.fare_tv);
+            TextView source = (TextView) convertView.findViewById(R.id.source);
+            TextView desti_tv = (TextView) convertView.findViewById(R.id.desti_tv);
+            TextView destination = (TextView) convertView.findViewById(R.id.destination);
+            final Button btn_details = (Button) convertView.findViewById(R.id.btn_details);
+            MaterialRippleLayout detail_cardView = (MaterialRippleLayout) convertView.findViewById(R.id.detail_cardView);
+            ImageView img_app = (ImageView) convertView.findViewById(R.id.img_app);
+            ImageView img_corporate = (ImageView) convertView.findViewById(R.id.img_corporate);
+            ImageView img_webportal = (ImageView) convertView.findViewById(R.id.img_webportal);
+            ImageView img_taxicompany = (ImageView) convertView.findViewById(R.id.img_taxicompany);
 
-        fareText.setText(context.getString(R.string.fare));
+            fareText.setText(context.getString(R.string.fare));
 
-        trip_id.setText(context.getString(R.string.tripid)+" " + trip.getId());
+            trip_id.setText(context.getString(R.string.tripid) + " " + trip.getId());
 
-        if (String.valueOf(trip.getId()).equalsIgnoreCase(AppPreferences.getTripId(context))) {
-          btn_details.setText(R.string.on_trip);
-        }else{
-            btn_details.setText(R.string.details);
-        }
+            Log.d("tripiddddddd", String.valueOf(trip.getId())+" ::: "+(AppPreferences.getTripId(context)));
+            if (String.valueOf(trip.getId()).equalsIgnoreCase(AppPreferences.getTripId(context))) {
+                btn_details.setText(R.string.on_trip);
+            } else {
+                btn_details.setText(R.string.details);
+            }
 
-        btn_details.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                btn_details.setClickable(false);
+            try {
                 if (AppPreferences.getTripId(context).equalsIgnoreCase("")) {
-                    Intent intent = new Intent(context, TripDetailsActivity.class);
-                    intent.putExtra("tripDetails", tripList.get(position));
-                    context.startActivity(intent);
-                } else if (String.valueOf(trip.getId()).equalsIgnoreCase(AppPreferences.getTripId(context))) {
-                    Class<?> lastActivity;
-                    try {
-                        lastActivity = Class.forName(AppPreferences.getActivity(context));
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                        lastActivity = TripDetailsActivity.class;
-                    }
-                    Intent intent = new Intent(context, lastActivity);
-                    intent.putExtra("tripDetails", tripList.get(position));
-                    context.startActivity(intent);
-                } else {
-                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
-                    dialogBuilder.setTitle(context.getString(R.string.alert));
-                    dialogBuilder.setMessage(context.getString(R.string.trip_already_assigned));
-                    dialogBuilder.setCancelable(false);
+                    if (AppPreferences.getPermission(context) == 0) {
+                        btn_details.setClickable(false);
+                        detail_cardView.setRippleBackground(context.getResources().getColor(R.color.black_overlay));
+                        btn_details.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
+                                alertDialog.setTitle(context.getString(R.string.blocked_title));
+                                alertDialog.setMessage(context.getString(R.string.blocked_message));
+                                alertDialog.setIcon(R.drawable.ic_launcher);
+                                alertDialog.show();
+                            }
+                        });
+                    } else {
+                        btn_details.setClickable(true);
+                        detail_cardView.setRippleBackground(context.getResources().getColor(R.color.colorPrimary));
+                        btn_details.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                btn_details.setClickable(false);
+                                if (AppPreferences.isShowDialog(context)) {
+                                    Intent intent = new Intent(context, AlertDialogActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    context.startActivity(intent);
 
-                    dialogBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.dismiss();
-                           // btn_details.setClickable(true);
+                                } else if (AppPreferences.getTripId(context).equalsIgnoreCase("")) {
+                                    Intent intent = new Intent(context, TripDetailsActivity.class);
+                                    intent.putExtra("tripDetails", tripList.get(position));
+                                    context.startActivity(intent);
+                                }
+                            }
+                        });
+                    }
+                } else {
+
+                    btn_details.setClickable(true);
+                    detail_cardView.setRippleBackground(context.getResources().getColor(R.color.colorPrimary));
+                    btn_details.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            btn_details.setClickable(false);
+                         /*if (AppPreferences.getTripId(context).equalsIgnoreCase("")) {
+                            Intent intent = new Intent(context, TripDetailsActivity.class);
+                            intent.putExtra("tripDetails", tripList.get(position));
+                            context.startActivity(intent);
+
+                        } else*/
+                            if (String.valueOf(trip.getId()).equalsIgnoreCase(AppPreferences.getTripId(context))) {
+                                Class<?> lastActivity;
+                                try {
+                                    lastActivity = Class.forName(AppPreferences.getActivity(context));
+                                } catch (ClassNotFoundException e) {
+                                    e.printStackTrace();
+                                    lastActivity = TripDetailsActivity.class;
+                                }
+                                Intent intent = new Intent(context, lastActivity);
+                                intent.putExtra("tripDetails", tripList.get(position));
+                                context.startActivity(intent);
+                            }else if(AppPreferences.isShowDialog(context)){
+                             Intent intent = new Intent(context, AlertDialogActivity.class);
+                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                             context.startActivity(intent);
+
+                         } else {
+                                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                                dialogBuilder.setTitle(context.getString(R.string.alert));
+                                dialogBuilder.setMessage(context.getString(R.string.trip_already_assigned));
+                                dialogBuilder.setCancelable(false);
+
+                                dialogBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.dismiss();
+                                        // btn_details.setClickable(true);
+                                    }
+                                });
+
+                                AlertDialog alertDialog = dialogBuilder.create();
+                                alertDialog.show();
+                            }
                         }
                     });
-
-                    AlertDialog alertDialog = dialogBuilder.create();
-                    alertDialog.show();
                 }
+            } catch (Exception e) {
             }
-        });
-        km_hours_tv.setText(trip.getDistance() + "   " + trip.getTravelTime());
-
-        agreement.setText(trip.getAgreement());
-        destination.setText(trip.getDestinationAddress());
-        fare_tv.setText(context.getString(R.string.currency) + trip.getFare() + context.getString(R.string.per_km));
 
 
-        if (trip.getTripType().equalsIgnoreCase(AppConstants.APP)) {
-            img_app.getDrawable().setColorFilter(0xddecc50f, PorterDuff.Mode.SRC_IN);
-            img_app.invalidate();
-        } else {
-            img_app.getDrawable().clearColorFilter();
-            img_app.invalidate();
+            km_hours_tv.setText(trip.getDistance() + "   " + trip.getTravelTime());
+
+            agreement.setText(trip.getAgreement());
+            source.setText(trip.getSourceAddress());
+            if(trip.getDestinationAddress().equalsIgnoreCase("")){
+                desti_tv.setVisibility(View.GONE);
+            }else{
+                desti_tv.setVisibility(View.VISIBLE);
+            }
+            destination.setText(trip.getDestinationAddress());
+            if (trip.getTripType().equalsIgnoreCase(AppConstants.CORPORATE)) {
+                fare_tv.setText(context.getString(R.string.currency) + trip.getFare());
+            } else {
+                fare_tv.setText(context.getString(R.string.currency) + trip.getFare() + context.getString(R.string.per_km));
+            }
+
+            if (trip.getTripType().equalsIgnoreCase(AppConstants.APP)) {
+                img_app.getDrawable().setColorFilter(0xddecc50f, PorterDuff.Mode.SRC_IN);
+                img_app.invalidate();
+            } else {
+                img_app.getDrawable().clearColorFilter();
+                img_app.invalidate();
+            }
+            if (trip.getTripType().equalsIgnoreCase(AppConstants.CORPORATE)) {
+                img_corporate.getDrawable().setColorFilter(0xddecc50f, PorterDuff.Mode.SRC_IN);
+                img_corporate.invalidate();
+                agreement_tv.setVisibility(View.GONE);
+                agreement.setVisibility(View.GONE);
+            } else {
+                img_corporate.getDrawable().clearColorFilter();
+                img_corporate.invalidate();
+                agreement_tv.setVisibility(View.VISIBLE);
+                agreement.setVisibility(View.VISIBLE);
+            }
+            if (trip.getTripType().equalsIgnoreCase(AppConstants.TAXI_COMPANY)) {
+                img_taxicompany.getDrawable().setColorFilter(0xddecc50f, PorterDuff.Mode.SRC_IN);
+                img_taxicompany.invalidate();
+            } else {
+                img_taxicompany.getDrawable().clearColorFilter();
+                img_taxicompany.invalidate();
+            }
+            if (trip.getTripType().equalsIgnoreCase(AppConstants.WEB_PORTAL)) {
+                img_webportal.getDrawable().setColorFilter(0xddecc50f, PorterDuff.Mode.SRC_IN);
+                img_webportal.invalidate();
+            } else {
+                img_webportal.getDrawable().clearColorFilter();
+                img_webportal.invalidate();
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
         }
-        if (trip.getTripType().equalsIgnoreCase(AppConstants.CORPORATE)) {
-            img_corporate.getDrawable().setColorFilter(0xddecc50f, PorterDuff.Mode.SRC_IN);
-            img_corporate.invalidate();
-            agreement_tv.setVisibility(View.GONE);
-            agreement.setVisibility(View.GONE);
-        } else {
-            img_corporate.getDrawable().clearColorFilter();
-            img_corporate.invalidate();
-            agreement_tv.setVisibility(View.VISIBLE);
-            agreement.setVisibility(View.VISIBLE);
-        }
-        if (trip.getTripType().equalsIgnoreCase(AppConstants.TAXI_COMPANY)) {
-            img_taxicompany.getDrawable().setColorFilter(0xddecc50f, PorterDuff.Mode.SRC_IN);
-            img_taxicompany.invalidate();
-        } else {
-            img_taxicompany.getDrawable().clearColorFilter();
-            img_taxicompany.invalidate();
-        }
-        if (trip.getTripType().equalsIgnoreCase(AppConstants.WEB_PORTAL)) {
-            img_webportal.getDrawable().setColorFilter(0xddecc50f, PorterDuff.Mode.SRC_IN);
-            img_webportal.invalidate();
-        } else {
-            img_webportal.getDrawable().clearColorFilter();
-            img_webportal.invalidate();
-        }
-
-
         return convertView;
     }
 
+    public void callBtn(){
+
+    }
 
     public class RoutesDownloadTask  extends AsyncTask<String, Void, String> {
 

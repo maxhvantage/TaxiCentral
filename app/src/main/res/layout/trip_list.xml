@@ -2,12 +2,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_below="@+id/ll"
+    android:id="@+id/mCardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/white_light"
     app:cardElevation="2dp"
     app:cardCornerRadius="0dp"
     app:cardBackgroundColor="@color/white">
+<!--        android:layout_marginTop="@dimen/heading"  -->
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -94,10 +96,28 @@
             android:text="taxi agreement"
             />
         <TextView
-            android:id="@+id/desti_tv"
+            android:id="@+id/source_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/agreement"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            android:text="@string/source_address"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/source"
+            android:layout_below="@+id/source_tv"
+            android:paddingLeft="@dimen/text_left_padding"
+            android:text="source adddress"
+            />
+
+        <TextView
+            android:id="@+id/desti_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/source"
             android:layout_marginTop="10dp"
             android:textColor="@color/black"
             android:text="@string/destination_address"/>
@@ -143,6 +163,7 @@
             android:layout_alignParentRight="true"
             android:layout_below="@+id/fare_tv">
             <com.balysv.materialripple.MaterialRippleLayout
+                android:id="@+id/detail_cardView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:mrl_rippleBackground="@color/colorPrimary"

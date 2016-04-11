@@ -10,6 +10,7 @@ import com.taxicentral.R;
 public class DialogManager {
 
     ProgressHUD mProgressHUD;
+    public static boolean cancelable = false;
 
     @SuppressWarnings("deprecation")
     public void showAlertDialog(final Context context, String title, String message,
@@ -37,7 +38,7 @@ public class DialogManager {
         alertDialog.setTitle(title);
         alertDialog.setMessage(message);
         alertDialog.setIcon(R.drawable.ic_launcher);
-        alertDialog.setCancelable(false);
+        alertDialog.setCancelable(cancelable);
 //		if(status != null)
 //			alertDialog.setIcon((status) ? R.drawable.success : R.drawable.fail);
         alertDialog.setButton("OK", ok);

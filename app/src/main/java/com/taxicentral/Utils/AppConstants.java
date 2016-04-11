@@ -5,6 +5,9 @@ package com.taxicentral.Utils;
  */
 public class AppConstants {
 
+
+    public static final double MAX_NO_MOVEMENT_SPEED = 0.224;
+
     public static final int TRIP_FREE = 0;
     public static final int TRIP_ALOT = 200;
     public static final int TRIP_START = 202;
@@ -19,6 +22,9 @@ public class AppConstants {
     public static final String TAXI_COMPANY = "taxicompany";
     public static final String WEB_PORTAL = "webportal";
 
+    public static final String CASH = "cash";
+    public static final String CREDIT = "credit";
+
     public static final String APPURL_OLD = "http://priyanshpatodi.com/testsite/texiDriverApp/api/api.php?method=";
     public static final String APPURL = "http://www.hvantagetechnologies.com/central-taxi/driver_app/";
 
@@ -26,7 +32,10 @@ public class AppConstants {
     public static final String LOGIN = APPURL + "general_api.php?method=SignIn";
     public static final String CHANGEPASSWORD = APPURL + "general_api.php?method=changePassword";
     public static final String LOGOUT = APPURL + "general_api.php?method=logout";
-    public static final String GETTRIP = APPURL + "trip.php?method=getTrip";
+   // public static final String GETTRIP = APPURL + "trip.php?method=getTrip";
+   public static final String GETTRIP = "http://www.hvantagetechnologies.com/central-taxi/driver_app/dinesh_getTrip.php?method=getTrip";
+    //public static final String GETTRIP = "http://www.hvantagetechnologies.com/central-taxi/driver_app/driverData.php?method=getTrip";
+    /*http://www.hvantagetechnologies.com/central-taxi/driver_app/driverData.php?method=getTrip*/
     public static final String ACCEPTTRIP = APPURL + "trip.php?method=acceptTrip";
     public static final String TRIPREJECT = APPURL + "trip.php?method=rejectTrip";
     public static final String SENDMESSAGE = APPURL + "trip.php?method=sendMessage";
@@ -39,10 +48,14 @@ public class AppConstants {
     public static final String TRIPHISTORY = APPURL + "trip.php?method=tripHistory";
     public static final String UPDATELOCATION = APPURL + "trip.php?method=locationUpdate";
     public static final String PAYPAYMENT = APPURL + "trip.php?method=PayPayment";
+    public static final String ACC_STATE_CORPORATE = APPURL + "trip.php?method=corporateAccount";
+    public static final String ACC_STATE_MYACCOUNT = APPURL + "trip.php?method=userAccount";
+    public static final String UPDATES = APPURL + "trip.php?method=getAdminNotification";
+    public static final String ZONEDRIVEDATA = APPURL + "trip.php?method=zoneDriverData";
+    public static final String statusMaintain = APPURL + "general_api.php?method=statusMaintain";
 
     public static final String PAYMENTCANCELED = APPURL_OLD + "paymentCancelled";
     public static final String STARTTRIP = APPURL_OLD + "startTrip";
     public static final String STOPTRIP = APPURL_OLD + "stopTrip";
-
 
 }

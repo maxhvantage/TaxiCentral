@@ -6,13 +6,11 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,11 +27,11 @@ import com.taxicentral.Utils.AppPreferences;
 import com.taxicentral.Utils.DialogManager;
 import com.taxicentral.Utils.Function;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -45,6 +43,36 @@ public class AnonymousReportActivity extends AppCompatActivity {
     String imageString;
     EditText report_description;
     DialogManager dialogManager;
+    View.OnClickListener send = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            btn_send.setClickable(false);
+            if (TextUtils.isEmpty(imageString)) {
+
+            } else if (TextUtils.isEmpty(report_description.getText().toString())) {
+                report_description.setError(getString(R.string.error_field_required));
+                btn_send.setClickable(true);
+            } else {
+                if (Function.isOnline(AnonymousReportActivity.this)) {
+                    new AnonymousReportTask(imageString, report_description.getText().toString()).execute();
+                } else {
+                    btn_send.setClickable(true);
+                    dialogManager.showAlertDialog(AnonymousReportActivity.this, getString(R.string.error_connection_problem), getString(R.string.error_check_internet_connection), null);
+                }
+            }
+
+        }
+    };
+
+    public static String encodeTobase64(Bitmap image) {
+        Bitmap immagex = image;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        immagex.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] b = baos.toByteArray();
+        String imageEncoded = Base64.encodeToString(b, Base64.DEFAULT);
+        return imageEncoded;
+    }
+
     //aa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,45 +94,30 @@ public class AnonymousReportActivity extends AppCompatActivity {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
 
+
         btn_send.setOnClickListener(send);
 
 
     }
 
-    View.OnClickListener send = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            btn_send.setClickable(false);
-            if(TextUtils.isEmpty(imageString)){
-
-            }else if(TextUtils.isEmpty(report_description.getText().toString())){
-                report_description.setError(getString(R.string.error_field_required));
-                btn_send.setClickable(true);
-            }else {
-                if(Function.isOnline(AnonymousReportActivity.this)) {
-                    new AnonymousReportTask(imageString, report_description.getText().toString()).execute();
-                }else{
-                    btn_send.setClickable(true);
-                    dialogManager.showAlertDialog(AnonymousReportActivity.this, getString(R.string.error_connection_problem), getString(R.string.error_check_internet_connection), null);
-                }
-            }
-
-        }
-    };
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        File croppedImageFile = new File(android.os.Environment.getExternalStorageDirectory().toString() + "/taxicentral/report.jpg");
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             cameraImage.setImageBitmap(imageBitmap);
             imageString = encodeTobase64(imageBitmap);
+
+
         }
-        if(resultCode == RESULT_CANCELED){
-           finish();
+
+
+        if (resultCode == RESULT_CANCELED) {
+            finish();
         }
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -114,20 +127,10 @@ public class AnonymousReportActivity extends AppCompatActivity {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.
                 INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         return true;
-    }
-
-    public static String encodeTobase64(Bitmap image)
-    {
-        Bitmap immagex=image;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        immagex.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] b = baos.toByteArray();
-        String imageEncoded = Base64.encodeToString(b, Base64.DEFAULT);
-        return imageEncoded;
     }
 
     private class AnonymousReportTask extends AsyncTask<Void, Void, String> {
@@ -135,7 +138,7 @@ public class AnonymousReportActivity extends AppCompatActivity {
         String image, report, id;
         GPSTracker gps;
 
-        public AnonymousReportTask(String image, String report){
+        public AnonymousReportTask(String image, String report) {
             this.image = image;
             this.report = report;
             gps = new GPSTracker(AnonymousReportActivity.this);
@@ -144,7 +147,7 @@ public class AnonymousReportActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            dialogManager.showProcessDialog(AnonymousReportActivity.this,"");
+            dialogManager.showProcessDialog(AnonymousReportActivity.this, "");
         }
 
         @Override
@@ -165,14 +168,14 @@ public class AnonymousReportActivity extends AppCompatActivity {
                 jsonObject.put("dateTime", date);
 
                 String json = serviceHandler.makeServiceCall(AppConstants.ANONYMOUSREPORT, ServiceHandler.POST, jsonObject);
-                if(json != null){
+                if (json != null) {
                     JSONObject object = new JSONObject(json);
-                    if(object.getString("status").equalsIgnoreCase("200")){
-                            JSONObject jsonObj = object.getJSONObject("result");
-                            id = jsonObj.getString("id");
+                    if (object.getString("status").equalsIgnoreCase("200")) {
+                        JSONObject jsonObj = object.getJSONObject("result");
+                        id = jsonObj.getString("id");
 
                         return "200";
-                    }else if(object.getString("status").equalsIgnoreCase("400")){
+                    } else if (object.getString("status").equalsIgnoreCase("400")) {
                         return "400";
                     }
                 }
@@ -185,14 +188,14 @@ public class AnonymousReportActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String status) {
             super.onPostExecute(status);
-            if(status.equalsIgnoreCase("200")){
+            if (status.equalsIgnoreCase("200")) {
                 Intent intent = new Intent(AnonymousReportActivity.this, AnonymousReportSentActivity.class);
                 intent.putExtra("id", id);
                 startActivity(intent);
                 finish();
-            }else{
+            } else {
                 btn_send.setClickable(true);
-                Snackbar.make(findViewById(android.R.id.content),getString(R.string.server_not_response),Snackbar.LENGTH_LONG).show();
+                Snackbar.make(findViewById(android.R.id.content), getString(R.string.server_not_response), Snackbar.LENGTH_LONG).show();
             }
 
             dialogManager.stopProcessDialog();

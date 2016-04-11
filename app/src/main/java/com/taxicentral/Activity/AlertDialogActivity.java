@@ -1,6 +1,8 @@
 package com.taxicentral.Activity;
 
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -26,7 +28,10 @@ public class AlertDialogActivity extends Activity {
         btn_showmap = (Button) findViewById(R.id.showmap);
         btn_showmap.setOnClickListener(showMap);
 
-        this.setFinishOnTouchOutside(false);
+        //this.setFinishOnTouchOutside(false);
+
+       /* NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.cancel(0);*/
 
     }
 
@@ -34,8 +39,7 @@ public class AlertDialogActivity extends Activity {
         @Override
         public void onClick(View v) {
             startActivity(new Intent(AlertDialogActivity.this, ShowMapsActivity.class));
-            AppPreferences.setShowDialog(AlertDialogActivity.this, true);
-            //finish();
+            finish();
         }
     };
 

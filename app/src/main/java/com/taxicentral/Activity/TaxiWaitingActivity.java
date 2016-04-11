@@ -1,16 +1,16 @@
 package com.taxicentral.Activity;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -32,11 +32,13 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.taxicentral.Classes.GPSTracker;
 import com.taxicentral.Model.Trip;
 import com.taxicentral.R;
+import com.taxicentral.Services.DistanceServices;
 import com.taxicentral.Services.ServiceHandler;
 import com.taxicentral.Utils.AppConstants;
 import com.taxicentral.Utils.AppPreferences;
@@ -57,7 +59,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class TaxiWaitingActivity extends AppCompatActivity {
+public class TaxiWaitingActivity extends AppCompatActivity implements LocationListener {
     //aa
     Trip trip;
     TextView name, number, address;
@@ -68,6 +70,13 @@ public class TaxiWaitingActivity extends AppCompatActivity {
     GPSTracker gps;
     double lat, lon;
     public static FloatingActionButton fabBoarded;
+    LocationManager locationManager;
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        AppPreferences.setActivityopen(instance, false);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +86,15 @@ public class TaxiWaitingActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         instance = this;
+
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+                0, 0, this);
+
+
+
+        AppPreferences.setActivityopen(instance, true);
         name = (TextView) findViewById(R.id.name);
         number = (TextView) findViewById(R.id.number);
         address = (TextView) findViewById(R.id.address);
@@ -89,6 +107,10 @@ public class TaxiWaitingActivity extends AppCompatActivity {
         dialogManager = new DialogManager();
         gps = new GPSTracker(this);
 
+        if(String.valueOf(trip.getDestinationLatitude()).equalsIgnoreCase("") || String.valueOf(trip.getDestinationLogitude()).equalsIgnoreCase("")){
+            trip.setDestinationLatitude(gps.getLatitude());
+            trip.setDestinationLogitude(gps.getLongitude());
+        }
          /* FloatingActionsMenu */
 
         floatingActionsMenu = (FloatingActionsMenu) findViewById(R.id.fab_menu);
@@ -108,18 +130,8 @@ public class TaxiWaitingActivity extends AppCompatActivity {
         lat = gps.getLatitude();
         lon = gps.getLongitude();
 
-        if (lat == 0.0 && lon == 0.0) {
+        if(lat == 0.0 && lon == 0.0){
             // showSettingsAlert();
-        }
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
         }
         map.setMyLocationEnabled(true);
 
@@ -132,11 +144,13 @@ public class TaxiWaitingActivity extends AppCompatActivity {
         map.addMarker(new MarkerOptions()
                 .position(sourceLocation)
                 .title(trip.getCustomerName())
-                .snippet(trip.getSourceAddress()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                .snippet(trip.getSourceAddress()).icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_three)));
         map.addMarker(new MarkerOptions()
                 .position(destinationLocation)
                 .title(trip.getCustomerName())
-                .snippet(trip.getDestinationAddress()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                .snippet(trip.getDestinationAddress()).icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_four)));
+
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(sourceLocation, 15));
 
         String url = Function.getDirectionsUrl(sourceLocation, destinationLocation);
         RoutesDownloadTask downloadTask = new RoutesDownloadTask(TaxiWaitingActivity.this);
@@ -385,6 +399,9 @@ public class TaxiWaitingActivity extends AppCompatActivity {
             super.onPostExecute(aBoolean);
             if(aBoolean){
                 AppPreferences.setTripId(TaxiWaitingActivity.this,"");
+                Intent intent = new Intent(TaxiWaitingActivity.this, NavigationDrawer.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
                 finish();
             }else{
                 runOnUiThread(new Runnable() {
@@ -426,6 +443,8 @@ public class TaxiWaitingActivity extends AppCompatActivity {
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
+            } catch (Exception e){
+                e.printStackTrace();
             }
             return false;
         }
@@ -436,9 +455,12 @@ public class TaxiWaitingActivity extends AppCompatActivity {
 
             if(aBoolean){
                 Intent intent = new Intent(TaxiWaitingActivity.this, TripStartedActivity.class);
+               // Intent intent = new Intent(TaxiWaitingActivity.this, RateExperienceActivity.class);
                 intent.putExtra("tripDetails", trip);
                 startActivity(intent);
+
                 finish();
+
 
                 dialogManager.stopProcessDialog();
             }else{
@@ -454,6 +476,7 @@ public class TaxiWaitingActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         AppPreferences.setActivity(TaxiWaitingActivity.this, getClass().getName());
+
     }
 
     @Override
@@ -573,7 +596,7 @@ public class TaxiWaitingActivity extends AppCompatActivity {
                     //Toast.makeText(ParserTask.this, "No Points", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
                 // Traversing through all the routes
                 for(int i=0;i<result.size();i++){
                     lineOptions = new PolylineOptions();
@@ -598,12 +621,15 @@ public class TaxiWaitingActivity extends AppCompatActivity {
 
                         points.add(position);
 
-                        String dis = distance.replace("km","").replace("m", "").replace(" ","").replace(",","");
+                        String dis = distance.replace("km","").replace("m","").replace(" ","").replace(",","");
                         double dist = new Double(dis);
-                        if(dist > 15){
-                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 6f));
+                        com.google.android.gms.maps.model.LatLng mapPoint =
+                                new com.google.android.gms.maps.model.LatLng(lat, lng);
+                        builder.include(mapPoint);
+                        if(dist > 40){
+                           // map.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 7f));
                         }else {
-                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 12f));
+                          //  map.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 12f));
                         }
 
                     }
@@ -612,6 +638,7 @@ public class TaxiWaitingActivity extends AppCompatActivity {
                     lineOptions.color(Color.BLUE);
                 }
                 map.addPolyline(lineOptions);
+                map.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 0));
             }
         }
 
@@ -623,6 +650,47 @@ public class TaxiWaitingActivity extends AppCompatActivity {
             this.distanceTime = distanceTime;
         }
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        AppPreferences.setActivityopen(instance, true);
+        if(AppPreferences.getActivityresumeopen(instance).equalsIgnoreCase("yes")){
+            fabBoarded.performClick();
+            AppPreferences.setActivityresumeopen(instance, "");
+        }else if(!AppPreferences.getActivityresumeopen(instance).equalsIgnoreCase("")) {
+            Intent intent = new Intent(this, RecivedMessage.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("message", AppPreferences.getActivityresumeopen(instance));
+            startActivity(intent);
+            AppPreferences.setActivityresumeopen(instance,"");
+        }
+
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        LatLng loc = new LatLng(location.getLatitude(), location.getLongitude());
+       // map.moveCamera(CameraUpdateFactory.newLatLngZoom(loc, 15));
+      //  map.moveCamera(CameraUpdateFactory.newLatLng(loc));
+    }
+
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String s) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String s) {
+
+    }
+
 
 }
 

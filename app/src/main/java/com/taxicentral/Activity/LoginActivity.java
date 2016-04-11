@@ -1,22 +1,13 @@
 package com.taxicentral.Activity;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -24,19 +15,19 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.iid.InstanceID;
+import com.google.android.gms.maps.model.LatLng;
 import com.taxicentral.Classes.GPSTracker;
 import com.taxicentral.Database.DBAdapter;
 import com.taxicentral.Gcm.Config;
 import com.taxicentral.Model.User;
 import com.taxicentral.R;
-import com.taxicentral.Services.GetTripServices;
 import com.taxicentral.Services.ServiceHandler;
 import com.taxicentral.Services.UpdateLocationToServer;
 import com.taxicentral.Services.ZoneControlServices;
@@ -70,7 +61,7 @@ public class LoginActivity extends AppCompatActivity {
 
     String regId;
     GoogleCloudMessaging gcm;
-
+LoginActivity instance = null;
     Locale myLocale;
 
     @Override
@@ -81,7 +72,7 @@ public class LoginActivity extends AppCompatActivity {
         dialogManager = new DialogManager();
         db = new DBAdapter(LoginActivity.this);
         gps = new GPSTracker(LoginActivity.this);
-
+instance = this;
         /* GCM */
         if (TextUtils.isEmpty(regId)) {
             regId = registerGCM();
@@ -97,19 +88,32 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == R.id.sign_in_button || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
+                    if(TextUtils.isEmpty(regId)) {
+                       regId = registerGCM();
+                    }else{
+                        attemptLogin();
+                    }
                     return true;
                 }
                 return false;
             }
         });
 
+        if(Function.isServiceRunning(LoginActivity.this, "com.taxicentral.Services.ZoneControlServices")){
+            stopService(new Intent(LoginActivity.this, ZoneControlServices.class));
+
+        }
 
         mSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 Function.hideSoftKeyboard(LoginActivity.this);
-                attemptLogin();
+
+                if(TextUtils.isEmpty(regId)) {
+                    regId = registerGCM();
+                }else{
+                    attemptLogin();
+                }
             }
         });
         Button mRegisterButton = (Button) findViewById(R.id.register_button);
@@ -123,6 +127,13 @@ public class LoginActivity extends AppCompatActivity {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        String action = getIntent().getAction();
+        if(action.equalsIgnoreCase("")){
+
+        }else if(action.equalsIgnoreCase("autoLogout")){
+            dialogManager.showAlertDialog(LoginActivity.this, "Log out", getString(R.string.already_login),null);
+        }
 
     }
 
@@ -162,9 +173,23 @@ public class LoginActivity extends AppCompatActivity {
                     if (gcm == null) {
                         gcm = GoogleCloudMessaging.getInstance(LoginActivity.this);
                     }
+                    Log.d("GcmRegisterActivity", "instanceID - regId:1 "
+                            );
+
+                    /*InstanceID instanceID = InstanceID.getInstance(instance);
+                    Log.d("GcmRegisterActivity", "instanceID - regId:2 "
+                            +instanceID.getId());
+                    String token = instanceID.getToken(Config.GOOGLE_PROJECT_ID,
+                            GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+                    Log.d("GcmRegisterActivity", "instanceID - regId: 3"
+                            + token);*/
                     regId = gcm.register(Config.GOOGLE_PROJECT_ID);
+
+                    // the action is used to distinguish
+
                     Log.d("GcmRegisterActivity", "registerInBackground - regId: "
                             + regId);
+
                     msg = "Device registered, registration ID=" + regId;
 
                    AppPreferences.setDeviceid(LoginActivity.this, regId);
@@ -257,7 +282,7 @@ public class LoginActivity extends AppCompatActivity {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTask<Void, Void, String> {
 
         private final String mUser;
         private final String mPassword;
@@ -274,9 +299,12 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected String doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
+            String android_id="";
 
+            android_id = Settings.Secure.getString(getContentResolver(),
+                    Settings.Secure.ANDROID_ID);
             try {
                 ServiceHandler serviceHandler = new ServiceHandler();
                 JSONObject jsonObject = new JSONObject();
@@ -286,14 +314,15 @@ public class LoginActivity extends AppCompatActivity {
                 jsonObject.put("latitude", latitude);
                 jsonObject.put("longitude", longitude);
                 jsonObject.put("regId", regId);
-
+                jsonObject.put("dateTime", Function.getCurrentDateTime());
+                jsonObject.put("android_id",android_id);
                 String json = serviceHandler.makeServiceCall(AppConstants.LOGIN, ServiceHandler.POST, jsonObject);
 
                 try {
                     // Simulate network access.
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
-                    return false;
+                    return "";
                 }
 
                 if (json != null) {
@@ -308,7 +337,7 @@ Log.d("Response json", jsonObject1.toString());
                             user.setId(Long.parseLong(object.getString("id")));
                             //user.setName(object.getString("name"));
                             user.setUserName(object.getString("username"));
-                            user.setUserImage(object.getString("userImage"));
+                            user.setUserImage(object.getString("driverImage"));
                             user.setPhone(object.getString("mobile"));
                             user.setAddress(object.getString("email"));
                             //user.setAddress(object.getString("address"));
@@ -324,39 +353,51 @@ Log.d("Response json", jsonObject1.toString());
                                 }
                             }
                         }
-                        return true;
+                        return "200";
+                    }
+
+                    if (jsonObject1.getString("status").equalsIgnoreCase("600")) {
+
+                        return "600";
                     }
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            return false;
+            return "";
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(final String success) {
             mAuthTask = null;
             //showProgress(false);
 
 
-            if (success) {
-                Intent intent = new Intent(LoginActivity.this, NavigationDrawer.class);
-                startActivity(intent);
+            if (success.equalsIgnoreCase("200")) {
+
                 AppPreferences.setDriverId(LoginActivity.this, driverId);
-                startService(new Intent(LoginActivity.this, ZoneControlServices.class));
+                //startService(new Intent(LoginActivity.this, ZoneControlServices.class));
                 startService(new Intent(LoginActivity.this, UpdateLocationToServer.class));
                 //startService(new Intent(LoginActivity.this, GetTripServices.class));
 
                 /*-------------*/
-                AppPreferences.setRadius(LoginActivity.this, 1000.0);
-                AppPreferences.setRadiusLatitude(LoginActivity.this, 22.726498);
-                AppPreferences.setRadiusLongitude(LoginActivity.this, 75.879785);
-                finish();
+
+               /* Intent intent = new Intent(LoginActivity.this, NavigationDrawer.class);
+                startActivity(intent);
+                finish();*/
+                new GetDriverZoneArea().execute();
+
+
+            }else if(success.equalsIgnoreCase("600")){
+                dialogManager.showAlertDialog(LoginActivity.this, "Login", getString(R.string.already_login_with_other_device),null);
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
             }
-            dialogManager.stopProcessDialog();
+            try {
+                dialogManager.stopProcessDialog();
+            }catch (IllegalArgumentException e){}
+
         }
 
         @Override
@@ -364,6 +405,97 @@ Log.d("Response json", jsonObject1.toString());
             mAuthTask = null;
             //showProgress(false);
             dialogManager.stopProcessDialog();
+        }
+
+        private class GetDriverZoneArea extends AsyncTask<Void, Void, Void> {
+            @Override
+            protected Void doInBackground(Void... voids) {
+
+
+               /* AppPreferences.setRadius(LoginActivity.this, 1000.0);
+                AppPreferences.setRadiusLatitude(LoginActivity.this, 22.72144663);
+                AppPreferences.setRadiusLongitude(LoginActivity.this, 75.88194609);
+
+                ArrayList<String> vertices1 = new ArrayList<String>();
+                vertices1.add("22.73007586/75.87924242");
+                vertices1.add("22.72390087/75.87314844");
+                vertices1.add("22.72144663/75.88194609");
+                vertices1.add("22.72738423/75.88748217");
+                vertices1.add("22.72540506/75.87888837");
+                //vertices1.add("22.72544464/75.88047624");
+                vertices1.add("22.73007586/75.87924242");
+
+                AppPreferences.setVertices(LoginActivity.this, vertices1);*/
+
+
+                try {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("driverId", AppPreferences.getDriverId(LoginActivity.this));
+                    ServiceHandler serviceHandler = new ServiceHandler();
+                    String json = serviceHandler.makeServiceCall(AppConstants.ZONEDRIVEDATA, ServiceHandler.POST, jsonObject);
+                    if(json!=null){
+                        ArrayList<String> vertices = new ArrayList<String>();
+                        JSONObject jsonObject1 = new JSONObject(json);
+                        if(jsonObject1.getString("status").equalsIgnoreCase("200")){
+                            JSONArray jsonArray = jsonObject1.getJSONArray("result");
+                            JSONObject jsonObj = jsonArray.getJSONObject(0);
+
+                            String zoneType = jsonObj.getString("zone_type");
+                            if(zoneType.equalsIgnoreCase("circle")){
+
+                                String cordinated = jsonObj.getString("cordinated");
+                                Log.d("cordinated", cordinated);
+                                //"(22.718191 75.859359, 75.859359),(22.718027, 75.856698),(22.718077, 75.855384),(22.718121, 75.858281)";
+
+                               // (22.7218058872191, 75.87645471691894),(1941.2374108097704)
+                                String cordinated1 = cordinated.replace("(","").replace(")", "").replace(" ","");
+                                String cortinat[] = cordinated1.split(",");
+                               // String cortinatlatlng[] = cortinat[0].split(" ");
+
+
+                                AppPreferences.setRadiusLatitude(LoginActivity.this, new Double(cortinat[0]));
+                                AppPreferences.setRadiusLongitude(LoginActivity.this, new Double(cortinat[1]));
+                                AppPreferences.setRadius(LoginActivity.this, new Double(cortinat[2]));
+
+
+                            }else if(zoneType.equalsIgnoreCase("polygon")){
+                                String cordinated = jsonObj.getString("cordinated");
+                                Log.d("cordinated", cordinated);
+                                        //"(22.718191, 75.859359),(22.718027, 75.856698),(22.718077, 75.855384),(22.718121, 75.858281)";
+                                String cordinated1 = cordinated.replace("(","").replace(")","").replace(" ","");
+                                String cortinat[] = cordinated1.split(",");
+                                for(int i=0;i<cortinat.length; i++){
+                                    String lat = cortinat[i];
+                                    Log.d("cordinated", lat.toString());
+                                    i++;
+                                    String lng = cortinat[i];
+                                    Log.d("cordinated", lng.toString());
+                                    vertices.add(lat+"/"+lng);
+                                }
+                                Log.d("cordinated", vertices.toString());
+                               /* JSONArray jsonArray = jsonObject1.getJSONArray(zoneType);
+                                for(int i=0; i<jsonArray.length(); i++){
+                                    JSONObject object = jsonArray.getJSONObject(i);
+                                    vertices.add(object.getString("lat")+"/"+object.getString("lng"));
+                                }*/
+                                AppPreferences.setVertices(LoginActivity.this, vertices);
+                            }
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+
+                Intent intent = new Intent(LoginActivity.this, NavigationDrawer.class);
+                startActivity(intent);
+                finish();
+            }
         }
     }
 }

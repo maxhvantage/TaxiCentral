@@ -4,11 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.taxicentral.Model.Trip;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Created by MMFA-MANISH on 11/9/2015.
@@ -34,8 +36,209 @@ public class AppPreferences {
     public static final String ARRIVED_TIME = "arrived_time";
     public static final String END_TIME = "end_time";
     public static final String AVL_CREDIT = "avl_credit";
+    public static final String ACTIVITYRESUMEOPEN = "activityresumeopen";
+    public static final String ACTIVITYOPEN = "activityopen";
+    public static final String Vertices = "Vertices";
+
+    public static final String BOOKINGLOCATIONSPEED = "booking_location_speed";
+    public static final String SOURCELATITUDE = "SOURCELATITUDE";
+    public static final String SOURCELONGITUDE = "SOURCELONGITUDE";
+    public static final String DESTILATITUDE = "DESTILATITUDE";
+    public static final String DESTILOGITUDE = "DESTILOGITUDE";
+    public static final String SOURCEADDRESS = "SOURCEADDRESS";
+    public static final String DESTIADDRESS = "DESTIADDRESS";
+
+    public static final String CHECKZONE = "CHECKZONE";
+    public static final String PAYMENTMODE = "PAYMENTMODE";
 
 
+    public static void setPaymentmode(Context context, String value) {
+        SharedPreferences preferences = context.getSharedPreferences(
+                PREFERENCES, 0);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(PAYMENTMODE, value);
+        editor.commit();
+    }
+
+    public static String getPaymentmode(Context context) {
+        SharedPreferences pereference = context.getSharedPreferences(
+                PREFERENCES, 0);
+        return pereference.getString(PAYMENTMODE, "");
+    }
+
+    //////////////////////
+
+    public static void setCheckzone(Context context, String value) {
+        SharedPreferences preferences = context.getSharedPreferences(
+                PREFERENCES, 0);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(CHECKZONE, value);
+        editor.commit();
+    }
+
+    public static String getCheckzone(Context context) {
+        SharedPreferences pereference = context.getSharedPreferences(
+                PREFERENCES, 0);
+        return pereference.getString(CHECKZONE, "");
+    }
+
+    //////////////////////
+
+    public static void setSourceaddress(Context context, String speed) {
+        SharedPreferences preferences = context.getSharedPreferences(
+                PREFERENCES, 0);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(SOURCEADDRESS, speed);
+        editor.commit();
+    }
+
+    public static String getSourceaddress(Context context) {
+        SharedPreferences pereference = context.getSharedPreferences(
+                PREFERENCES, 0);
+        return pereference.getString(SOURCEADDRESS, "");
+    }
+
+    //////////////////////
+    public static void setDestiaddress(Context context, String speed) {
+        SharedPreferences preferences = context.getSharedPreferences(
+                PREFERENCES, 0);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(DESTIADDRESS, speed);
+        editor.commit();
+    }
+
+    public static String getDestiaddress(Context context) {
+        SharedPreferences pereference = context.getSharedPreferences(
+                PREFERENCES, 0);
+        return pereference.getString(DESTIADDRESS, "");
+    }
+
+    //////////////////////
+    public static void setSourcelatitude(Context context, String speed) {
+        SharedPreferences preferences = context.getSharedPreferences(
+                PREFERENCES, 0);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(SOURCELATITUDE, speed);
+        editor.commit();
+    }
+
+    public static String getSourcelatitude(Context context) {
+        SharedPreferences pereference = context.getSharedPreferences(
+                PREFERENCES, 0);
+        return pereference.getString(SOURCELATITUDE, "0");
+    }
+
+    //////////////////////
+    public static void setSourcelongitude(Context context, String speed) {
+        SharedPreferences preferences = context.getSharedPreferences(
+                PREFERENCES, 0);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(SOURCELONGITUDE, speed);
+        editor.commit();
+    }
+
+    public static String getSourcelongitude(Context context) {
+        SharedPreferences pereference = context.getSharedPreferences(
+                PREFERENCES, 0);
+        return pereference.getString(SOURCELONGITUDE, "0");
+    }
+
+    //////////////////////
+    public static void setDestilatitude(Context context, String speed) {
+        SharedPreferences preferences = context.getSharedPreferences(
+                PREFERENCES, 0);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(DESTILATITUDE, speed);
+        editor.commit();
+    }
+
+    public static String getDestilatitude(Context context) {
+        SharedPreferences pereference = context.getSharedPreferences(
+                PREFERENCES, 0);
+        return pereference.getString(DESTILATITUDE, "0");
+    }
+
+    //////////////////////
+    public static void setDestilogitude(Context context, String speed) {
+        SharedPreferences preferences = context.getSharedPreferences(
+                PREFERENCES, 0);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(DESTILOGITUDE, speed);
+        editor.commit();
+    }
+
+    public static String getDestilogitude(Context context) {
+        SharedPreferences pereference = context.getSharedPreferences(
+                PREFERENCES, 0);
+        return pereference.getString(DESTILOGITUDE, "0");
+    }
+
+    //////////////////////
+    public static void setBookingSpeed(Context context, String speed) {
+        SharedPreferences preferences = context.getSharedPreferences(
+                PREFERENCES, 0);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(BOOKINGLOCATIONSPEED, speed);
+        editor.commit();
+    }
+
+    public static String getBookingSpeed(Context context) {
+        SharedPreferences pereference = context.getSharedPreferences(
+                PREFERENCES, 0);
+        return pereference.getString(BOOKINGLOCATIONSPEED, "0");
+    }
+
+    //////////////////////
+
+    public static void setVertices(Context context, ArrayList<String> vertices) {
+        SharedPreferences preferences = context.getSharedPreferences(
+                PREFERENCES, 0);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        editor.putString(Vertices, vertices.toString());
+        editor.commit();
+    }
+
+    public static String getVertices(Context context) {
+        SharedPreferences pereference = context.getSharedPreferences(
+                PREFERENCES, 0);
+        return pereference.getString(Vertices, "");
+    }
+
+    ///////////////////////
+
+    public static void setActivityresumeopen(Context context, String data) {
+        SharedPreferences preferences = context.getSharedPreferences(
+                PREFERENCES, 0);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        editor.putString(ACTIVITYRESUMEOPEN, data);
+        editor.commit();
+    }
+
+    public static String getActivityresumeopen(Context context) {
+        SharedPreferences pereference = context.getSharedPreferences(
+                PREFERENCES, 0);
+        return pereference.getString(ACTIVITYRESUMEOPEN, "");
+    }
+
+    ///////////////////////
+    public static void setActivityopen(Context context, boolean isopen) {
+        SharedPreferences preferences = context.getSharedPreferences(
+                PREFERENCES, 0);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        editor.putBoolean(ACTIVITYOPEN, isopen);
+        editor.commit();
+    }
+
+    public static boolean getActivityopen(Context context) {
+        SharedPreferences pereference = context.getSharedPreferences(
+                PREFERENCES, 0);
+        return pereference.getBoolean(ACTIVITYOPEN, false);
+    }
+
+    ///////////////////////
     public static void setAvlCredit(Context context, float time) {
         SharedPreferences preferences = context.getSharedPreferences(
                 PREFERENCES, 0);

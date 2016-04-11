@@ -11,6 +11,17 @@
     tools:showIn="@layout/activity_notification"
     tools:context="com.taxicentral.Activity.NotificationActivity">
 
+    <TextView
+        android:id="@+id/header_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/heading"
+        android:background="@color/black_light"
+        android:text="History"
+        android:textColor="@color/colorPrimary"
+        android:gravity="center"
+        android:visibility="gone"/>
+
     <ListView
         android:id="@+id/notify_listview"
         android:layout_width="match_parent"

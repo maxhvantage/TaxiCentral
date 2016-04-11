@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -61,6 +62,7 @@ public class TripHistoryActivity extends AppCompatActivity {
     DatePickerDialog DatePickerDialog_toDate;
     DialogManager dialogManager;
     DBAdapter db;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,7 +161,7 @@ public class TripHistoryActivity extends AppCompatActivity {
 
         switch (id) {
             case android.R.id.home:
-                onBackPressed();
+                finish();
                 return true;
             case R.id.action_filter:
 
@@ -182,6 +184,7 @@ public class TripHistoryActivity extends AppCompatActivity {
                 final AlertDialog alertDialog = dialogBuilder.create();
 
                 btn_filter = (Button) dialogView.findViewById(R.id.btn_filter);
+               Button btn_cancel = (Button) dialogView.findViewById(R.id.btn_cancel);
                 final EditText txtFromDate = (EditText) dialogView.findViewById(R.id.from_date);
                 final EditText txtToDate = (EditText) dialogView.findViewById(R.id.to_date);
 
@@ -208,6 +211,13 @@ public class TripHistoryActivity extends AppCompatActivity {
                     }
                 });
 
+                btn_cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        alertDialog.dismiss();
+                    }
+                });
+
                 txtFromDate.setOnClickListener(new View.OnClickListener() {
 
                     @Override
@@ -218,7 +228,7 @@ public class TripHistoryActivity extends AppCompatActivity {
                     }
                 });
                 Calendar newCalendar = Calendar.getInstance();
-                newCalendar.add(Calendar.MONTH, -1);
+                newCalendar.add(Calendar.MONTH,0);
                 dateFormatter_fromDate = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
                 DatePickerDialog_fromDate = new DatePickerDialog(this,
                         new DatePickerDialog.OnDateSetListener() {
@@ -250,7 +260,7 @@ public class TripHistoryActivity extends AppCompatActivity {
                     }
                 });
                 //Calendar newCalendar1 = Calendar.getInstance();
-                newCalendar.add(Calendar.MONTH, -1);
+                newCalendar.add(Calendar.MONTH, 0);
                 dateFormatter_toDate = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
                 DatePickerDialog_toDate = new DatePickerDialog(this,
                         new DatePickerDialog.OnDateSetListener() {
@@ -333,12 +343,50 @@ public class TripHistoryActivity extends AppCompatActivity {
                                     trip.setTripType(object1.getString("trip_type"));
                                     trip.setCustomerName(object1.getString("userName"));
                                     trip.setCustomerImage(object1.getString("userImage"));
-                                    trip.setSourceAddress(object1.getString("source_landmark"));
-                                    trip.setDestinationAddress(object1.getString("destination_landmark"));
-                                    trip.setSourceLatitude(new Double(object1.getString("source_latitude")));
-                                    trip.setSourcelogitude(new Double(object1.getString("source_longitude")));
-                                    trip.setDestinationLatitude(new Double(object1.getString("destination_latitude")));
-                                    trip.setDestinationLogitude(new Double(object1.getString("destination_longitude")));
+                                    if(object1.getString("customer_rating").equalsIgnoreCase("")){
+                                        trip.setCustomerRating(1.0f);
+                                    }else {
+                                        trip.setCustomerRating(Float.parseFloat(object1.getString("customer_rating")));
+                                    }
+                                    Log.d("ratingvalue",object1.getString("customer_rating"));
+
+
+                                    if(object1.getString("source_address").equalsIgnoreCase("")){
+                                        trip.setSourceAddress(object1.getString("source_landmark"));
+                                    }else{
+                                        trip.setSourceAddress(object1.getString("source_address"));
+                                    }
+
+                                    if(object1.getString("destination_address").equalsIgnoreCase("")){
+                                        trip.setDestinationAddress(object1.getString("destination_landmark"));
+                                    }else{
+                                        trip.setDestinationAddress(object1.getString("destination_address"));
+                                    }
+
+                                    if(object1.getString("source_latitude").equalsIgnoreCase("")){
+                                        trip.setSourceLatitude(0.0);
+                                    }else{
+                                        trip.setSourceLatitude(new Double(object1.getString("source_latitude")));
+                                    }
+                                    if(object1.getString("source_longitude").equalsIgnoreCase("")){
+                                        trip.setSourcelogitude(0.0);
+                                    }else{
+                                        trip.setSourcelogitude(new Double(object1.getString("source_longitude")));
+                                    }
+                                    if(object1.getString("destination_latitude").equalsIgnoreCase("")){
+                                        trip.setDestinationLatitude(0.0);
+                                    }else{
+                                        trip.setDestinationLatitude(new Double(object1.getString("destination_latitude")));
+                                    }
+                                    if(object1.getString("destination_longitude").equalsIgnoreCase("")){
+                                        trip.setDestinationLogitude(0.0);
+                                    }else{
+                                        trip.setDestinationLogitude(new Double(object1.getString("destination_longitude")));
+                                    }
+
+
+
+
                                     //tripList.add(trip);
                                     trip.setMonth(monthArrayList.get(j));
 

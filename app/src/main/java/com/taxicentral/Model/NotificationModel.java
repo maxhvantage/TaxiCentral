@@ -5,7 +5,7 @@ package com.taxicentral.Model;
  */
 public class NotificationModel {
     int id;
-    String header, description;
+    String header, description, time;
 
     public int getId() {
         return id;
@@ -29,5 +29,13 @@ public class NotificationModel {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 }

@@ -1,12 +1,17 @@
 package com.taxicentral.Activity;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
@@ -16,6 +21,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.bugsnag.android.Bugsnag;
+import com.taxicentral.Classes.FusedLocationService;
 import com.taxicentral.Classes.GPSTracker;
 import com.taxicentral.R;
 import com.taxicentral.Utils.AppPreferences;
@@ -26,7 +32,14 @@ import java.util.Locale;
 public class SplashActivity extends Activity {
 
 //aa
+private static final String[] LOCATION_PERMS={
+        Manifest.permission.ACCESS_FINE_LOCATION
+};
 
+
+    public static SplashActivity instance = null;
+    GPSTracker gps;
+    @TargetApi(Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,14 +52,36 @@ public class SplashActivity extends Activity {
 
 
         setContentView(R.layout.activity_splash);
-
+instance =this;
         Bugsnag.init(this);
 
         FontsOverride.setDefaultFont(this, "MONOSPACE", "MontserratRegular.ttf");
 
+        if(Build.VERSION.SDK_INT >= 23) {
+            requestPermissions(LOCATION_PERMS, 0);
+        }
 
+       // AppPreferences.setShowDialog(this, true);
         //setLocaleFa(SplashActivity.this);
+
+
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (canAccessLocation()) {
+            gps = new GPSTracker(SplashActivity.this);
+            gps.getLocation();
+            Log.d("checkLocation1111", gps.getLatitude() + " : " + gps.getLongitude());
+        }
+    }
+    private boolean canAccessLocation() {
+        return(hasPermission(Manifest.permission.ACCESS_FINE_LOCATION));
+    }
+    @TargetApi(Build.VERSION_CODES.M)
+    private boolean hasPermission(String perm) {
+        return(PackageManager.PERMISSION_GRANTED==checkSelfPermission(perm));
+    }
+
 
     public static void setLocaleFa (Context context){
         Locale locale = new Locale("es");
@@ -62,9 +97,13 @@ public class SplashActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-        final GPSTracker gps = new GPSTracker(SplashActivity.this);
-        gps.getLocation();
+      /*  final GPSTracker gps = new GPSTracker(SplashActivity.this);
+        gps.getLocation();*/
 
+        if(Build.VERSION.SDK_INT< 23) {
+            gps = new GPSTracker(SplashActivity.this);
+            gps.getLocation();
+        }
             final Thread timerThread = new Thread() {
                 public void run() {
                     try {
@@ -72,8 +111,23 @@ public class SplashActivity extends Activity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     } finally {
+//                        Log.d("checkLocation", gps.getLatitude() +" : " + gps.getLongitude());
+                        //Log.d("checkLocation", fusedLocationService.getLocation().getLatitude() +" : "+ fusedLocationService.getLocation().getLongitude());
+                        if(Build.VERSION.SDK_INT>= 23) {
+                            if (AppPreferences.getDriverId(SplashActivity.this) == 0) {
+                                Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+                                intent.setAction("");
+                                startActivity(intent);
+                              //  finish();
+                            } else {
+                                Intent intent = new Intent(SplashActivity.this, NavigationDrawer.class);
+                                //Intent intent = new Intent(SplashActivity.this, Rough.class);
+                                startActivity(intent);
+                               // finish();
+                            }
+                        } else if(gps == null){
 
-                        if(gps.getLatitude() == 0.0 && gps.getLongitude() == 0.0){
+                        }else if(gps.getLatitude() == 0.0 && gps.getLongitude() == 0.0){
                             runOnUiThread(new Runnable() {
                                 public void run() {
                                     showSettingsAlert();
@@ -81,14 +135,15 @@ public class SplashActivity extends Activity {
                             });
 
                         }else {
-                            Log.d("checkLocation", gps.getLatitude() +" : "+ gps.getLongitude());
+
                             if (AppPreferences.getDriverId(SplashActivity.this) == 0) {
                                 Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+                                intent.setAction("");
                                 startActivity(intent);
                                 finish();
                             } else {
                                 Intent intent = new Intent(SplashActivity.this, NavigationDrawer.class);
-                                //Intent intent = new Intent(SplashActivity.this, PaymentActivity.class);
+                                //Intent intent = new Intent(SplashActivity.this, Rough.class);
                                 startActivity(intent);
                                 finish();
                             }
@@ -120,5 +175,11 @@ public class SplashActivity extends Activity {
             }
         });
         alertDialog.show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
     }
 }

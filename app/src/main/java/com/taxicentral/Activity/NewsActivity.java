@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.taxicentral.Adapter.NewsAdapter;
 import com.taxicentral.Model.NewsModel;
@@ -32,6 +33,7 @@ public class NewsActivity extends AppCompatActivity {
     ListView news_listview;
     NewsAdapter newsAdapter;
     List<NewsModel> modelsList;
+    TextView header_tv;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +43,8 @@ public class NewsActivity extends AppCompatActivity {
 
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        header_tv = (TextView) findViewById(R.id.header_tv);
 
         news_listview = (ListView) findViewById(R.id.news_listview);
         modelsList = new ArrayList<NewsModel>();
@@ -95,6 +99,17 @@ public class NewsActivity extends AppCompatActivity {
                             });
                         }
                         return "200";
+                    }
+                    if(jsonObj.getString("status").equalsIgnoreCase("400")){
+                        final String message = jsonObj.getString("message");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                header_tv.setVisibility(View.VISIBLE);
+                                header_tv.setText(message);
+                            }
+                        });
+                        return "400";
                     }
                 }
             } catch (JSONException e) {

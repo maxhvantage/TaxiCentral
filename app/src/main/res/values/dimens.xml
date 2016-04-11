@@ -7,6 +7,7 @@
     <dimen name="nav_header_vertical_spacing">16dp</dimen>
     <dimen name="nav_header_height">160dp</dimen>
     <dimen name="heading">8dp</dimen>
+    <dimen name="heading_listview">100dp</dimen>
 
 
     <dimen name="triphistory_heading">16dp</dimen>

@@ -64,6 +64,15 @@
                 android:padding="@dimen/heading"
                 android:text="@string/other"/>
         </RadioGroup>
+
+            <EditText
+                android:id="@+id/description_et"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/radiogroup"
+                android:layout_margin="@dimen/heading"
+                android:visibility="gone"
+                android:hint="@string/report_description"/>
         </RelativeLayout>
     </android.support.v7.widget.CardView>
 

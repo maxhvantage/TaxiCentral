@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -16,6 +17,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.taxicentral.Classes.GPSTracker;
@@ -44,6 +46,7 @@ import java.util.List;
 public class TripHistoryDetailsActivity extends AppCompatActivity {
     TextView trip_id, trip_date, trip_time, trip_type;
     private GoogleMap map;
+    RatingBar rate;
     Trip tripHistory;
     GPSTracker gps;
     double lat, lon;
@@ -62,6 +65,7 @@ public class TripHistoryDetailsActivity extends AppCompatActivity {
         trip_date = (TextView) findViewById(R.id.trip_date);
         trip_time = (TextView) findViewById(R.id.trip_time);
         trip_type = (TextView) findViewById(R.id.trip_type);
+        rate = (RatingBar) findViewById(R.id.rate);
 
         gps = new GPSTracker(this);
 
@@ -91,6 +95,8 @@ public class TripHistoryDetailsActivity extends AppCompatActivity {
 
         trip_date.setText(setDate);
         trip_time.setText(setTime);
+        Log.d("ratingvalue",tripHistory.getCustomerRating()+"");
+        rate.setRating(tripHistory.getCustomerRating());
 
 
 
@@ -215,6 +221,7 @@ public class TripHistoryDetailsActivity extends AppCompatActivity {
 
 
                 try {
+
                     jObject = new JSONObject(jsonData[0]);
                     DirectionsJSONParser parser = new DirectionsJSONParser();
 
@@ -238,7 +245,7 @@ public class TripHistoryDetailsActivity extends AppCompatActivity {
                     //Toast.makeText(ParserTask.this, "No Points", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
                 // Traversing through all the routes
                 for (int i = 0; i < result.size(); i++) {
                     lineOptions = new PolylineOptions();
@@ -262,6 +269,9 @@ public class TripHistoryDetailsActivity extends AppCompatActivity {
                         LatLng position = new LatLng(lat, lng);
 
                         points.add(position);
+                        com.google.android.gms.maps.model.LatLng mapPoint =
+                                new com.google.android.gms.maps.model.LatLng(lat, lng);
+                        builder.include(mapPoint);
 
                     }
                     lineOptions.addAll(points);
@@ -269,6 +279,7 @@ public class TripHistoryDetailsActivity extends AppCompatActivity {
                     lineOptions.color(Color.BLUE);
                 }
                 map.addPolyline(lineOptions);
+                map.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 0));
             }
         }
 

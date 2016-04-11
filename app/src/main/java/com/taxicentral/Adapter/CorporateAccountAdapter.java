@@ -1,6 +1,7 @@
 package com.taxicentral.Adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -124,6 +125,15 @@ public class CorporateAccountAdapter extends BaseExpandableListAdapter {
 
         TextView txtName = (TextView) convertView
                 .findViewById(R.id.trip_name);
+
+
+        int count = getChildrenCount(groupPosition);
+        Log.d("countttt", count +" : "+ groupPosition+" : "+childPosition);
+        if(childPosition == count-1){
+
+        }
+
+        txtName.setText(trip.getFare());
 
         return convertView;
     }

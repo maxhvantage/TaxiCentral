@@ -1,11 +1,15 @@
 package com.taxicentral.Tabs;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -39,7 +43,8 @@ public class CorporateFragment extends Fragment {
     ExpandableListView corporateListview;
     HashMap<String, ArrayList<Trip>> tripHistoryList;
     ArrayList<String> monthList;
-    CorporateAccountAdapter corporateAccountAdapter;
+    public static CorporateAccountAdapter corporateAccountAdapter;
+    public CorporateFragment corporateFragmentinstance = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -47,24 +52,26 @@ public class CorporateFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_corporate, container, false);
 
+        corporateFragmentinstance = this;
         corporateListview = (ExpandableListView) view.findViewById(R.id.trip_lv);
 
         tripHistoryList = new HashMap<String, ArrayList<Trip>>();
         monthList = new ArrayList<String>();
 
-        if(Function.isOnline(getActivity())){
-            new CorporateAccountTask("","").execute();
-        }else{
-            Snackbar.make(view.findViewById(android.R.id.content), getString(R.string.error_check_internet_connection), Snackbar.LENGTH_LONG).show();
-        }
 
+
+        if(Function.isOnline(getActivity())){
+            new CorporateAccountTask().execute();
+        }else{
+            Snackbar.make(getView().findViewById(android.R.id.content), getString(R.string.error_check_internet_connection), Snackbar.LENGTH_LONG).show();
+        }
         corporateAccountAdapter = new CorporateAccountAdapter(getActivity(), monthList, tripHistoryList);
         corporateListview.setAdapter(corporateAccountAdapter);
 
         DisplayMetrics dm = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
         int width = dm.widthPixels;
-        corporateListview.setIndicatorBounds(width - GetDipsFromPixel(55), width - GetDipsFromPixel(18));
+        corporateListview.setIndicatorBounds(width - GetDipsFromPixel(55), width - GetDipsFromPixel(25));
 
         return view;
     }
@@ -77,14 +84,18 @@ public class CorporateFragment extends Fragment {
         return (int) (pixels * scale + 0.5f);
     }
 
-    private class CorporateAccountTask extends AsyncTask<Void, Void, ArrayList<Trip>> {
+    @Override
+    public void onResume() {
+        super.onResume();
+
+    }
+
+    public class CorporateAccountTask extends AsyncTask<Void, Void, ArrayList<Trip>> {
 
         ArrayList<Trip> tripList;
         ArrayList<String> monthArrayList;
-        String fromdate, todate;
-        public CorporateAccountTask(String fromdate, String todate){
-            this.fromdate = fromdate;
-            this.todate = todate;
+        public CorporateAccountTask(){
+
             monthArrayList = new ArrayList<String>();
         }
 
@@ -94,9 +105,7 @@ public class CorporateFragment extends Fragment {
                 ServiceHandler serviceHandler = new ServiceHandler();
                 JSONObject object = new JSONObject();
                 object.put("driverId", AppPreferences.getDriverId(getActivity()));
-                object.put("fromDate", fromdate);
-                object.put("toDate", todate);
-                String json = serviceHandler.makeServiceCall(AppConstants.TRIPHISTORY, ServiceHandler.POST, object);
+                String json = serviceHandler.makeServiceCall(AppConstants.ACC_STATE_CORPORATE, ServiceHandler.POST, object);
                 if(json != null){
                     JSONObject jsonObject = new JSONObject(json);
                     if(jsonObject.getString("status").equalsIgnoreCase("200")){
@@ -111,27 +120,29 @@ public class CorporateFragment extends Fragment {
 
                             JSONObject jsonObj = jsonArray.getJSONObject(i);
                             for(int j=0; j<jsonObj.length(); j++){
-                                JSONArray jsonArray2 = jsonObj.getJSONArray(monthArrayList.get(j));
-
+                                JSONObject jsonObjMonthList = jsonObj.getJSONObject(monthArrayList.get(j));
+                                JSONArray jsonArrayinside = jsonObjMonthList.getJSONArray("result");
                                 tripList = new ArrayList<>();
-                                for(int k=0; k<jsonArray2.length(); k++){
-                                    JSONObject object1 = jsonArray2.getJSONObject(k);
+                                for(int k=0; k<jsonArrayinside.length(); k++){
+                                    JSONObject object1 = jsonArrayinside.getJSONObject(k);
                                     Trip trip = new Trip();
-                                    trip.setId(Long.parseLong(object1.getString("id")));
-                                    trip.setDate(object1.getString("tripdate"));
-                                    trip.setTripType(object1.getString("tripType"));
-                                    trip.setCustomerName(object1.getString("userName"));
-                                    trip.setCustomerImage(object1.getString("userImage"));
-                                    trip.setSourceAddress(object1.getString("sourceaddress"));
-                                    trip.setDestinationAddress(object1.getString("destinationaddress"));
-                                    trip.setSourceLatitude(new Double(object1.getString("sourcelatitute")));
-                                    trip.setSourcelogitude(new Double(object1.getString("sourcelongitude")));
-                                    trip.setDestinationLatitude(new Double(object1.getString("destination_lat")));
-                                    trip.setDestinationLogitude(new Double(object1.getString("destination_lon")));
+                                    trip.setFare("Trip "+(k+1)+" - "+getString(R.string.currency)+object1.getString("trip"));
                                     tripList.add(trip);
                                 }
+                                Trip trip = new Trip();
+                                trip.setFare("Total " + monthArrayList.get(j) + " - " + getString(R.string.currency) + jsonObjMonthList.getInt("amount"));
+                                tripList.add(trip);
+                                Trip trip1 = new Trip();
+                                trip1.setFare("");
+                                tripList.add(trip1);
+                             //   String totalAmount = jsonObjMonthList.getString("amount");
+
+                                Log.d("test", "Total "+monthArrayList.get(j)+" "+getString(R.string.currency)+jsonObjMonthList.getInt("amount"));
+
                                 monthList.add(monthArrayList.get(j));
                                 tripHistoryList.put(monthList.get(j),tripList);
+
+
                             }
 
                         }
@@ -147,10 +158,12 @@ public class CorporateFragment extends Fragment {
         @Override
         protected void onPostExecute(ArrayList<Trip> trips) {
             super.onPostExecute(trips);
+
             corporateAccountAdapter.updateResult(monthList, tripHistoryList);
             /*if(btn_filter != null){
                 btn_filter.setClickable(true);
             }*/
         }
     }
+
 }
